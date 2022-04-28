@@ -33,12 +33,13 @@
             this.lblNom = new System.Windows.Forms.Label();
             this.lblCollision = new System.Windows.Forms.Label();
             this.lblVitesse = new System.Windows.Forms.Label();
-            this.pnlCartographie = new System.Windows.Forms.Panel();
             this.btnCartographier = new System.Windows.Forms.Button();
             this.btnAvancer = new System.Windows.Forms.Button();
             this.btnGauche = new System.Windows.Forms.Button();
             this.btnDroite = new System.Windows.Forms.Button();
+            this.pctrCartographie = new System.Windows.Forms.PictureBox();
             this.grpBoxEtats.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pctrCartographie)).BeginInit();
             this.SuspendLayout();
             // 
             // grpBoxEtats
@@ -111,17 +112,6 @@
             this.lblVitesse.TabIndex = 3;
             this.lblVitesse.Text = "Vitesse :";
             // 
-            // pnlCartographie
-            // 
-            this.pnlCartographie.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlCartographie.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.pnlCartographie.Location = new System.Drawing.Point(275, 25);
-            this.pnlCartographie.Name = "pnlCartographie";
-            this.pnlCartographie.Size = new System.Drawing.Size(600, 399);
-            this.pnlCartographie.TabIndex = 3;
-            // 
             // btnCartographier
             // 
             this.btnCartographier.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -183,16 +173,27 @@
             this.btnDroite.Text = ">";
             this.btnDroite.UseVisualStyleBackColor = false;
             // 
+            // pctrCartographie
+            // 
+            this.pctrCartographie.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.pctrCartographie.BackgroundImage = global::PFR3.Properties.Resources.blanc;
+            this.pctrCartographie.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.pctrCartographie.Location = new System.Drawing.Point(291, 17);
+            this.pctrCartographie.Name = "pctrCartographie";
+            this.pctrCartographie.Size = new System.Drawing.Size(597, 396);
+            this.pctrCartographie.TabIndex = 0;
+            this.pctrCartographie.TabStop = false;
+            // 
             // FormPrincipal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 27F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(951, 534);
+            this.Controls.Add(this.pctrCartographie);
             this.Controls.Add(this.btnDroite);
             this.Controls.Add(this.btnGauche);
             this.Controls.Add(this.btnAvancer);
             this.Controls.Add(this.btnCartographier);
-            this.Controls.Add(this.pnlCartographie);
             this.Controls.Add(this.grpBoxEtats);
             this.Font = new System.Drawing.Font("Microsoft YaHei", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.Margin = new System.Windows.Forms.Padding(4);
@@ -201,6 +202,7 @@
             this.Text = "Pilotage robotique";
             this.grpBoxEtats.ResumeLayout(false);
             this.grpBoxEtats.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pctrCartographie)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -211,10 +213,10 @@
         private Label lblNom;
         private Label lblCollision;
         private Label lblVitesse;
-        private Panel pnlCartographie;
         private Button btnCartographier;
         private Button btnAvancer;
         private Button btnGauche;
         private Button btnDroite;
+        private PictureBox pctrCartographie;
     }
 }

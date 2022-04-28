@@ -1,15 +1,18 @@
 using System;
+using System.Collections;
 
 namespace TEST
 {
     public partial class FormPrincipal : Form
     {
-        private int mise_en_pause=0;
         public FormPrincipal()
         {
             InitializeComponent();
         }
 
+        private int mise_en_pause = 0;
+        private Point[] points = new Point[100];
+        private int index = 0;
         private void btnCartographier_Click(object sendser, EventArgs e)
         {
             mise_en_pause = 0;
@@ -140,7 +143,7 @@ namespace TEST
             //On peut enregistrer la carte obtenue seulement si la cartograpie est terminé
             if(getProgressBar("pgsBar").Value >= 100)
             {
-
+                this.pctrCartographie.Image.Save("d:\\carte.Jpeg", System.Drawing.Imaging.ImageFormat.Jpeg);
             }            
         }
 
@@ -176,6 +179,7 @@ namespace TEST
                 getButton("btnPause").BackgroundImage = global::PFR3.Properties.Resources.pause;
             }
             mise_en_pause++;
+            this.dessiner_point(mise_en_pause, mise_en_pause + 1);
         }
 
         private Button getButton(String nom)
@@ -214,5 +218,21 @@ namespace TEST
             return null;
         }
 
+        private void dessiner_point( int x, int y)
+        {
+            //objet graphique
+            this.points[this.index] = new Point(x, y);
+            this.index++;
+            if(this.points.Length >= 2)
+            {
+                Graphics.FromImage(this.pctrCartographie.BackgroundImage).DrawLine(new Pen(Color.Black, 3), this.points[this.index-1],this.points[this.index]);
+                pctrCartographie.Refresh();
+            }
+            else
+            {
+                Graphics.FromImage(this.pctrCartographie.BackgroundImage).DrawImage(this.pctrCartographie.BackgroundImage, this.points[this.index]);
+                pctrCartographie.Refresh();
+            }
+        }
     }
 }
