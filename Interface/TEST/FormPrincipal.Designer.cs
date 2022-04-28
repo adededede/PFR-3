@@ -212,12 +212,6 @@
         private Label lblCollision;
         private Label lblVitesse;
         private Panel pnlCartographie;
-        private ProgressBar pgsBar;
-        private Label lblCartographie;
-        private Button btnRecommencer;
-        private Button btnPause;
-        private Button btnArret;
-        private Button btnEnregistrer;
         private Button btnCartographier;
         private Button btnAvancer;
         private Button btnGauche;

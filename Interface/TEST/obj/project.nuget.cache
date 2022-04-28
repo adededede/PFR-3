@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "tOszp4CT1V9FaJvuhlP3B2L2IH5NRpmCQcuLvqZgIAwlCGiLbe8Wbv6SRwyFsDazeZR3zBqLAZV1xABSvJOGrw==",
+  "dgSpecHash": "1NWcnLbNS1pmHHnPYOCZwiVev1ldfhsHpRWYyrto2yBxzk7W4z9vdgiHUFAvLM4qNQ9/SK6GpXNZjYcZn/eVzQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\trica\\Desktop\\PFR3\\TEST\\PFR3.csproj",
+  "projectFilePath": "C:\\Users\\trica\\Desktop\\PFR-3\\Interface\\TEST\\PFR3.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\trica\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
     "C:\\Users\\trica\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",

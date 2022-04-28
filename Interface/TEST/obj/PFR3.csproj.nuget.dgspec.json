@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\trica\\Desktop\\PFR3\\TEST\\PFR3.csproj": {}
+    "C:\\Users\\trica\\Desktop\\PFR-3\\Interface\\TEST\\PFR3.csproj": {}
   },
   "projects": {
-    "C:\\Users\\trica\\Desktop\\PFR3\\TEST\\PFR3.csproj": {
+    "C:\\Users\\trica\\Desktop\\PFR-3\\Interface\\TEST\\PFR3.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\trica\\Desktop\\PFR3\\TEST\\PFR3.csproj",
+        "projectUniqueName": "C:\\Users\\trica\\Desktop\\PFR-3\\Interface\\TEST\\PFR3.csproj",
         "projectName": "PFR3",
-        "projectPath": "C:\\Users\\trica\\Desktop\\PFR3\\TEST\\PFR3.csproj",
+        "projectPath": "C:\\Users\\trica\\Desktop\\PFR-3\\Interface\\TEST\\PFR3.csproj",
         "packagesPath": "C:\\Users\\trica\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\trica\\Desktop\\PFR3\\TEST\\obj\\",
+        "outputPath": "C:\\Users\\trica\\Desktop\\PFR-3\\Interface\\TEST\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
