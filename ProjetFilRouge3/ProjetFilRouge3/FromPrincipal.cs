@@ -27,6 +27,7 @@ namespace ProjetFilRouge3
         private int mise_en_pause = 0;
         private Point[] points = new Point[10000];
         private int index = 0;
+        private string appareil = "";
         private void btnCartographier_Click(object sendser, EventArgs e)
         {
             mise_en_pause = 0;
@@ -258,11 +259,12 @@ namespace ProjetFilRouge3
             if (this.sousMenuItemActiver.Image == null)
             {
                 this.sousMenuItemActiver.Image = global::ProjetFilRouge3.Properties.Resources.check;
-                lancerBluetooth();
+                lancerBluetooth(true);
             }
             else
             {
                 this.sousMenuItemActiver.Image = null;
+                lancerBluetooth(false);
             }
         }
 
@@ -317,7 +319,7 @@ namespace ProjetFilRouge3
 
         }
 
-        private void lancerBluetooth()
+        private void lancerBluetooth(Boolean lancer)
         {
             // Query for extra properties you want returned
             string[] requestedProperties = { "System.Devices.Aep.DeviceAddress", "System.Devices.Aep.IsConnected", "System.Devices.Aep.Bluetooth.Le.IsConnectable" };
@@ -332,14 +334,15 @@ namespace ProjetFilRouge3
             // EnumerationCompleted and Stopped are optional to implement.
             deviceWatcher.EnumerationCompleted += DeviceWatcher_EnumerationCompleted;
             deviceWatcher.Stopped += DeviceWatcher_Stopped;
-
+            
             // Start the watcher.
             deviceWatcher.Start();
-            while (true)
+            if (!lancer)
             {
-                Console.WriteLine("");
-                Console.Read();
+                //The watcher can't be stopped right now.  A watcher can only be stopped if it has been started and has not stopped.'
+                deviceWatcher.Stop();
             }
+            
         }
 
         private void DeviceWatcher_Stopped(DeviceWatcher sender, object args)
@@ -364,7 +367,25 @@ namespace ProjetFilRouge3
 
         private void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation args)
         {
-            MessageBox.Show(args.Name);
+            string jimmy = "546546";
+            if (args.Id.Contains(jimmy.ToLower()))
+            {
+                MessageBox.Show("Nom : JIMMY\nType :" + args.GetType() + "\nId: " + args.Id + "\nKind: " + args.Kind);
+            }
+            MessageBox.Show("Nom :"+args.Name+"\nType :"+ args.GetType() + "\nId: "+ args.Id + "\nKind: "+ args.Kind+"\nLocation: "+args.EnclosureLocation+"\nPropriétés: "+args.Properties);
+            /*98:D3:91:FD:A2:4F
+             * if (args.Name == "JIMMY")
+            {
+                MessageBox.Show(args.Name +  " coucou!!");
+            }
+            else if (args.Name == "")
+            {
+
+            }
+            else
+            {
+                MessageBox.Show(args.Name);
+            }*/
         }
 
         //connexion au device voulu
@@ -372,9 +393,9 @@ namespace ProjetFilRouge3
         {
         }
 
-        private void deconnexionAppareil(BluetoothLEDevice ble)
+        private void deconnexionAppareil()
         {
-            ble.Dispose();
+          
         }
 
     }

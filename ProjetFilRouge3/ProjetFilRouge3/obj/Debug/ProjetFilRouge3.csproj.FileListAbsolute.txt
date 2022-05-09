@@ -11,3 +11,15 @@ C:\Users\trica\Desktop\ProjetFilRouge3\ProjetFilRouge3\bin\Debug\Windows.winmd
 C:\Users\trica\Desktop\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.csproj.CopyComplete
 C:\Users\trica\Desktop\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.exe
 C:\Users\trica\Desktop\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.pdb
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\bin\Debug\ProjetFilRouge3.exe.config
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\bin\Debug\ProjetFilRouge3.exe
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\bin\Debug\ProjetFilRouge3.pdb
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.csproj.AssemblyReference.cache
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.csproj.SuggestedBindingRedirects.cache
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.FromPrincipal.resources
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.Properties.Resources.resources
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.csproj.GenerateResource.cache
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.csproj.CoreCompileInputs.cache
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.csproj.CopyComplete
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.exe
+C:\Users\trica\Desktop\PFR-3\ProjetFilRouge3\ProjetFilRouge3\obj\Debug\ProjetFilRouge3.pdb
