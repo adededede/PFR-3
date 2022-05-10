@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
 
 namespace ProjetFilRouge3
@@ -24,10 +25,11 @@ namespace ProjetFilRouge3
 
         }
 
+        private static DeviceInformation jimmy = null;
         private int mise_en_pause = 0;
         private Point[] points = new Point[10000];
         private int index = 0;
-        private string appareil = "";
+        DeviceWatcher deviceWatcher;
         private void btnCartographier_Click(object sendser, EventArgs e)
         {
             mise_en_pause = 0;
@@ -319,11 +321,11 @@ namespace ProjetFilRouge3
 
         }
 
-        private void lancerBluetooth(Boolean lancer)
+        private async Task lancerBluetooth(Boolean lancer)
         {
             // Query for extra properties you want returned
             string[] requestedProperties = { "System.Devices.Aep.DeviceAddress", "System.Devices.Aep.IsConnected", "System.Devices.Aep.Bluetooth.Le.IsConnectable" };
-            DeviceWatcher deviceWatcher = DeviceInformation.CreateWatcher(BluetoothLEDevice.GetDeviceSelectorFromPairingState(false), requestedProperties, DeviceInformationKind.AssociationEndpoint);
+            deviceWatcher = DeviceInformation.CreateWatcher(BluetoothLEDevice.GetDeviceSelectorFromPairingState(false), requestedProperties, DeviceInformationKind.AssociationEndpoint);
 
             // Register event handlers before starting the watcher.
             // Added, Updated and Removed are required to get all nearby devices
@@ -342,7 +344,6 @@ namespace ProjetFilRouge3
                 //The watcher can't be stopped right now.  A watcher can only be stopped if it has been started and has not stopped.'
                 deviceWatcher.Stop();
             }
-            
         }
 
         private void DeviceWatcher_Stopped(DeviceWatcher sender, object args)
@@ -367,30 +368,40 @@ namespace ProjetFilRouge3
 
         private void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation args)
         {
-            string jimmy = "546546";
-            if (args.Id.Contains(jimmy.ToLower()))
+            //MessageBox.Show("Nom :"+args.Name+"\nType :"+ args.GetType() + "\nId: "+ args.Id + "\nKind: "+ args.Kind+"\nLocation: "+args.EnclosureLocation+"\nPropriétés: "+args.Properties);
+            //98:d3:91:fd:a2:50
+            //Si on récupère jimmy on stock ces informations
+            //if (true)
+            //{
+            jimmy = args;
+            if (jimmy != null)
             {
-                MessageBox.Show("Nom : JIMMY\nType :" + args.GetType() + "\nId: " + args.Id + "\nKind: " + args.Kind);
+                ConnexionAppareil();
             }
-            MessageBox.Show("Nom :"+args.Name+"\nType :"+ args.GetType() + "\nId: "+ args.Id + "\nKind: "+ args.Kind+"\nLocation: "+args.EnclosureLocation+"\nPropriétés: "+args.Properties);
-            /*98:D3:91:FD:A2:4F
-             * if (args.Name == "JIMMY")
-            {
-                MessageBox.Show(args.Name +  " coucou!!");
-            }
-            else if (args.Name == "")
-            {
-
-            }
-            else
-            {
-                MessageBox.Show(args.Name);
-            }*/
+            //}
         }
 
         //connexion au device voulu
-        private async void ConnexionAppareil(DeviceInformation deviceInfo)
+        private async void ConnexionAppareil()
         {
+            BluetoothLEDevice bled = await BluetoothLEDevice.FromIdAsync(jimmy.Id);
+            GattDeviceServicesResult resultat = await bled.GetGattServicesAsync();
+            String serv = jimmy.Id + ":";
+            //si on arrive à se connecter
+            if (resultat.Status == GattCommunicationStatus.Success)
+            {
+                deviceWatcher.Added -= DeviceWatcher_Added;
+                var services = resultat.Services;
+                foreach (var service in services)
+                {
+                    serv +='\n'+service.Uuid.ToString();
+                }
+                MessageBox.Show(serv);
+            }
+            else
+            {
+                MessageBox.Show(serv+" "+resultat.Status.ToString());
+            }
         }
 
         private void deconnexionAppareil()
