@@ -100,8 +100,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
          intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
          intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(receiver, intentFilter);
-
-        Toast.makeText(this,"unpaired : "+notPairedDevices.toString(),Toast.LENGTH_SHORT).show();
     }
 
     private void connexionBluetooth(){
@@ -171,10 +169,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void affichagePeripheriques() {
         String p = "";
         for(BluetoothDevice d : notPairedDevices){
-            p=d.getAddress()+'\n';
+            p+=d.getAddress()+'\n';
         }
         for(BluetoothDevice d : pairedDevices){
-            p=d.getAddress()+'\n';
+            p+=d.getAddress()+'\n';
         }
         FragementPeripheriques f = new FragementPeripheriques(p);
         //launch the fragment corresponding to playists with a tag in case we want to see its visibility

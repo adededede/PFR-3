@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
@@ -42,15 +44,17 @@ public class FragementPeripheriques extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_affichage_peripheriques, container, false);
         ListView list = v.findViewById(R.id.fragment_p);
-        List<String> adresse_mac = new ArrayList<String>();
+        String[] tab;
         if(tous_peripheriques.isEmpty()){
-           adresse_mac = Arrays.asList(peripheriques.split("\n").clone());
+           tab = peripheriques.split("\n").clone();
         }
         else{
-            adresse_mac = Arrays.asList(tous_peripheriques.split("\n").clone());
+            tab = tous_peripheriques.split("\n").clone();
         }
+        final List<String> adresse_mac = new ArrayList<String>(Arrays.asList(tab));
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this.getContext(), android.R.layout.simple_list_item_1,adresse_mac) ;
         list.setAdapter(adapter);
         return v;
     }
+
 }
