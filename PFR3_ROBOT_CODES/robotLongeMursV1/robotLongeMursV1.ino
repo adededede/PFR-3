@@ -53,10 +53,10 @@ void loop() {
   c3distance = lectureCapteurLateral();
   
   //affiche valeur distance dans terminal
-  //affichageDansLeTerminal(c1distance, c2distance, c3distance);
+  affichageDansLeTerminal(c1distance, c2distance, c3distance);
   
   //arret d'urgence
-  if (c1distance > 5 && c1distance < 60 ) { //pour eviter les valeurs extremes en cas de non detection de mur
+  if (c1distance < 60 && c1distance != 0 ) { //pour eviter les valeurs extremes en cas de non detection de mur
     Serial.println("ARRET D'URGENCE ACTIVE");
     //retour sonore
     bip();
@@ -74,24 +74,24 @@ void loop() {
   }
 
   //pour longer le mur
-  else if (c3distance < 10 ) {
+  else if ((c3distance < 30 && c3distance != 0) || (c2distance < 40 && c2distance != 0)) {
     //retour sonore
     bip();
     //tourne a droite car trop prêt du mur
     //jusqu'à revenir dans le bon intervalle
     sd.writeMicroseconds(1680);
-    delay(200);
+    delay(300);
     //on remet le robot droit en marche avant
     sd.writeMicroseconds(1580);
   }
   
   //pour longer le mur
-  else if (c3distance > 30) {
+  else if (c3distance > 50) {
     //retour sonore
     bip();
     //tourne a gauche car trop loin du mur
     sg.writeMicroseconds(1680);
-    delay(200);
+    delay(300);
     //on remet le robot droit en marche avant
     sg.writeMicroseconds(1580);
   }
