@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -25,6 +26,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -33,6 +35,7 @@ import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView nView;
     androidx.appcompat.widget.Toolbar tBar;
     String dernierFragement;
+    UUID telephone;
 
     //variable bluetooth
     BluetoothManager bluetoothManager;
@@ -56,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // Discovery has found a device. Get the BluetoothDevice
                 // object and its info from the Intent.
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                //Toast.makeText(context, "nom : "+device.getName()+"\n@MAC : "+device.getAddress(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "nom : "+device.getName()+"\n@MAC : "+device.getAddress(),Toast.LENGTH_LONG).show();
                 //on initialise le set contenant les devices inconnus
                 notPairedDevices.add(device);
                 //Toast.makeText(context, "taille unpaired : "+notPairedDevices.size(),Toast.LENGTH_SHORT).show();
@@ -94,12 +98,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //add an event lister to the navigation items
         nView.setNavigationItemSelectedListener(this);
 
+        telephone = getDeviceID(this);
+
         //initialisation du filtre de discovery
         //et on lance la recherche de nouveaux appareils
-         intentFilter =new IntentFilter();
-         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(receiver, intentFilter);
+    }
+
+    public static UUID getDeviceID(Context context) {
+        final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        final String tmDevice, tmSerial, androidId;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            tmDevice = Settings.Secure.getString(
+                    context.getContentResolver(),
+                    Settings.Secure.ANDROID_ID);
+        } else {
+            final TelephonyManager mTelephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (mTelephony.getDeviceId() != null) {
+                tmDevice = mTelephony.getDeviceId();
+            } else {
+                tmDevice = Settings.Secure.getString(
+                        context.getContentResolver(),
+                        Settings.Secure.ANDROID_ID);
+            }
+        }
+        //num IMEI de mon tel : 861758042792177 ou 861758043102178
+        tmSerial = "861758042792177";
+        androidId = android.provider.Settings.Secure.getString(context.getContentResolver(),
+                android.provider.Settings.Secure.ANDROID_ID);
+        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        return deviceUuid;
     }
 
     private void connexionBluetooth(){
@@ -168,15 +199,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void affichagePeripheriques() {
         String p = "";
+        BluetoothDevice jimmy = null;
+        int index = 0;
         for(BluetoothDevice d : notPairedDevices){
             p+=d.getAddress()+'\n';
+            //if(d.getAddress()=="98:D3:91:FD:AD:50"){
+                jimmy = d;
+           // }
         }
         for(BluetoothDevice d : pairedDevices){
             p+=d.getAddress()+'\n';
+            if(d.getAddress()=="98:D3:91:FD:AD:50"){
+                jimmy = d;
+            }
         }
         FragementPeripheriques f = new FragementPeripheriques(p);
+        ThreadConnexion thread;
+        if(jimmy!=null){
+            thread = new ThreadConnexion(jimmy,telephone);
+            thread.run();
+        }
+
         //launch the fragment corresponding to playists with a tag in case we want to see its visibility
-        LaunchFragment(f,"FragementPeripheriques");
+        //LaunchFragment(f,"FragementPeripheriques");
     }
 
     private void LaunchFragment(Fragment frag, String tag){
@@ -229,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             break;
                     }
                 }
-                //remplacer par un popup de chargement
+                // TODO remplacer par un popup de chargement
                 //Toast.makeText(this,"Scan des appareils autour de vous ....",Toast.LENGTH_LONG).show();
             }
             // TEST REUSSI
