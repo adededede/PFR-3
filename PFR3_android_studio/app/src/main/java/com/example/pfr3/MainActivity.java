@@ -9,6 +9,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -23,6 +24,8 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import java.util.HashSet;
@@ -41,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Set<BluetoothDevice> pairedDevices = new HashSet<>();
     Set<BluetoothDevice> notPairedDevices = new HashSet<>();
     IntentFilter intentFilter;
-    private static final int REQUEST_ACCESS_FINE_LOCATION = 16;
+    private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -49,9 +52,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // Discovery has found a device. Get the BluetoothDevice
                 // object and its info from the Intent.
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                Toast.makeText(context, "nom : "+device.getName()+"\n@MAC : "+device.getAddress(),Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "nom : "+device.getName()+"\n@MAC : "+device.getAddress(),Toast.LENGTH_SHORT).show();
                 //on initialise le set contenant les devices inconnus
                 notPairedDevices.add(device);
+                //Toast.makeText(context, "taille unpaired : "+notPairedDevices.size(),Toast.LENGTH_SHORT).show();
+            }
+            if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
+                Toast.makeText(context, "FIN : unpaired : "+notPairedDevices.size(),Toast.LENGTH_SHORT).show();
+                affichagePeripheriques();
             }
         }
     };
@@ -84,8 +92,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //initialisation du filtre de discovery
         //et on lance la recherche de nouveaux appareils
-         intentFilter =new IntentFilter(BluetoothDevice.ACTION_FOUND);
+         intentFilter =new IntentFilter();
+         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(receiver, intentFilter);
+
+        Toast.makeText(this,"unpaired : "+notPairedDevices.toString(),Toast.LENGTH_SHORT).show();
     }
 
     private void connexionBluetooth(){
@@ -103,6 +115,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 bluetoothManager.getAdapter().disable();
             }
         }
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (!isGpsEnabled) {
+            startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
+        }
+        Toast.makeText(this,"CONNEXIONBLUETOOTH : unpaired : "+notPairedDevices.toString(),Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -145,12 +163,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+
+    private void affichagePeripheriques() {
+        String p = "";
+        for(BluetoothDevice d : notPairedDevices){
+            p+=d.getName() + " : "+d.getAddress()+'\n';
+        }
+        for(BluetoothDevice d : pairedDevices){
+            p+=d.getName() + " : "+d.getAddress()+'\n';
+        }
+        Toast.makeText(this,p,Toast.LENGTH_SHORT).show();
+    }
+
     private void affichagePeripherique() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         if (!isGpsEnabled) {
             startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
         }
+        Toast.makeText(this,"AFFICHAGEPERIPHERIQUE : unpaired : "+notPairedDevices.toString(),Toast.LENGTH_SHORT).show();
         //si le bluetooth est activé
         if(bluetoothManager.getAdapter().isEnabled()){
             //initialisation du set avec les devices connus
@@ -162,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 bluetoothManager.getAdapter().cancelDiscovery();
             }
             else{
+                Toast.makeText(this,"Scan des appareils autour de vous ....",Toast.LENGTH_LONG).show();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     switch (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                         case PackageManager.PERMISSION_DENIED:
@@ -172,15 +204,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             break;
                         case PackageManager.PERMISSION_GRANTED:
                             boolean a = bluetoothManager.getAdapter().startDiscovery();
-                            Toast.makeText(MainActivity.this, "Start discovery es "+a, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Start discovery : "+a, Toast.LENGTH_SHORT).show();
                             break;
                     }
                 }
             }
             // TEST
-            for(BluetoothDevice bd : notPairedDevices){
-                Toast.makeText(this, "nom : "+bd.getName()+"\n@MAC : "+bd.getAddress(),Toast.LENGTH_SHORT).show();
-            }
+            //for(BluetoothDevice bd : notPairedDevices){
+            //    Toast.makeText(this, "nom : "+bd.getName()+"\n@MAC : "+bd.getAddress(),Toast.LENGTH_SHORT).show();
+            //}
             // TEST REUSSI
             //for(BluetoothDevice bd : pairedDevices){
             //    Toast.makeText(this, "nom : "+bd.getName()+"\n@MAC : "+bd.getAddress(),Toast.LENGTH_SHORT).show();
@@ -190,17 +222,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //on ajoute le tout à l'endroit fait pour
             /* NOT YET ;-;
 
-            Dialog peripheriques = new Dialog(this);
-            peripheriques.setContentView(R.layout.popup_peripheriques);
-            ListView liste = peripheriques.findViewById(R.id.list_view);
-            BluetoothDevice[] devices = new BluetoothDevice[10];
-            int index = 0;
-            for(BluetoothDevice device : this.pairedDevices){
-                devices[index] = device;
-            }
-            ArrayAdapter<BluetoothDevice> arrayAdapter = new ArrayAdapter<BluetoothDevice>(this,R.layout.text_view , devices);
-            liste.setAdapter(arrayAdapter);
-            peripheriques.show();*/
+            */
         }
         else{
             //le bluetooth n'est pas activé
@@ -217,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     boolean a = bluetoothManager.getAdapter().startDiscovery();
-                    Toast.makeText(MainActivity.this, "Start discovery es " + a, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Start discovery : " + a, Toast.LENGTH_SHORT).show();
                 } else {
                     //exit application or do the needful
                 }
