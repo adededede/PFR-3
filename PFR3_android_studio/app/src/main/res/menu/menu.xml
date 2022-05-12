@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_toolBar_bluetooth"
+        android:title="Bluetooth">
+
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/navigation_toolbar_activer"
+                    android:title="Activer" />
+                <item
+                    android:id="@+id/navigation_toolbar_peripherique"
+                    android:title="Périphériques disponibles" />
+            </group>
+        </menu>
+    </item>
+
+
+    <item
+        android:id="@+id/navigation_toolBar_mode"
+        android:title="Gestion du mode">
+
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/navigation_toolbar_automatique"
+                    android:title="Mode Automatique" />
+                <item
+                    android:id="@+id/navigation_toolbar_manuel"
+                    android:title="Mode Manuel" />
+            </group>
+        </menu>
+    </item>
+</menu>

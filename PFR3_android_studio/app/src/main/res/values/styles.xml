@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
+        <item name="android:statusBarColor">#00000000</item>
+    </style>
+    <style name="ItemFont" parent="android:Widget.TextView">
+        <item name="android:fontFamily">@font/alegreya_sc</item>
+    </style>
+
+</resources>
