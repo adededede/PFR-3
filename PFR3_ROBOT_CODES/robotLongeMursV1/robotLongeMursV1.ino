@@ -53,10 +53,10 @@ void loop() {
   c3distance = lectureCapteurLateral();
   
   //affiche valeur distance dans terminal
-  affichageDansLeTerminal(c1distance, c2distance, c3distance);
+  //affichageDansLeTerminal(c1distance, c2distance, c3distance);
   
   //arret d'urgence
-  if (c1distance < 50) {
+  if (c1distance > 5 && c1distance < 60 ) { //pour eviter les valeurs extremes en cas de non detection de mur
     Serial.println("ARRET D'URGENCE ACTIVE");
     //retour sonore
     bip();
@@ -64,44 +64,37 @@ void loop() {
     sg.writeMicroseconds(1500);
     sd.writeMicroseconds(1500);
     delay(500);
-    //tourne à droite tant qu'il y a un obstacle
-    sg.writeMicroseconds(1420);
-    sd.writeMicroseconds(1580);
-    while (c1distance < 50 ) {
-      c1distance = lectureCapteurAvant();
-      bip();
-    }
+    //tourne à droite pour éviter obstacle (tourne à 90° a droite)
+    sg.writeMicroseconds(1410);
+    sd.writeMicroseconds(1590);
+    delay(2200);
     //on remet le robot droit en marche avant
     sg.writeMicroseconds(1580);
     sd.writeMicroseconds(1580);
   }
-/*
+
   //pour longer le mur
   else if (c3distance < 10 ) {
     //retour sonore
     bip();
     //tourne a droite car trop prêt du mur
     //jusqu'à revenir dans le bon intervalle
-    sd.writeMicroseconds(1700);
-    while (c3distance < 10 ) {
-      c3distance = lectureCapteurLateral();
-    }
+    sd.writeMicroseconds(1680);
+    delay(200);
     //on remet le robot droit en marche avant
-    sd.writeMicroseconds(1600);
+    sd.writeMicroseconds(1580);
   }
   
   //pour longer le mur
-  else if (c3distance > 40) {
+  else if (c3distance > 30) {
     //retour sonore
     bip();
     //tourne a gauche car trop loin du mur
-    sg.writeMicroseconds(1700);
-    while (c3distance > 40) {
-      c3distance = lectureCapteurLateral();
-    }
+    sg.writeMicroseconds(1680);
+    delay(200);
     //on remet le robot droit en marche avant
-    sg.writeMicroseconds(1600);
-  }*/
+    sg.writeMicroseconds(1580);
+  }
 }//fin loop
 
 
