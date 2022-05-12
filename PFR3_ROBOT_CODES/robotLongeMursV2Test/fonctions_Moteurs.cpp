@@ -27,14 +27,11 @@ void arretTotal(Servo rouesGauches,Servo RouesDroites,int delai){
  void tournerDroite(Servo rouesDroites,Servo rouesGauches,int millisecondeRoueDroites){
     rouesDroites.writeMicroseconds(millisecondeRoueDroites);
     rouesGauches.writeMicroseconds(1580);
-  
  }
 
  void avancer(Servo rouesDroites,Servo rouesGauches,int millisecondes){
-  
   rouesDroites.writeMicroseconds(millisecondes);
   rouesGauches.writeMicroseconds(millisecondes);
-  
  }
 
 
