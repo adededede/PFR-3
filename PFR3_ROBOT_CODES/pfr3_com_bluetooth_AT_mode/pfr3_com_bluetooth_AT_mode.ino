@@ -2,7 +2,7 @@
 
 #include <SoftwareSerial.h>
 
-SoftwareSerial BTSerial(5, 6); // TX | RX
+SoftwareSerial BTSerial(10, 11); // TX | RX
 
 void setup()
 {
