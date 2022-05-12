@@ -7,6 +7,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
 import android.app.Dialog;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     DrawerLayout dLayout;
     NavigationView nView;
     androidx.appcompat.widget.Toolbar tBar;
+    String dernierFragement;
 
     //variable bluetooth
     BluetoothManager bluetoothManager;
@@ -167,12 +171,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void affichagePeripheriques() {
         String p = "";
         for(BluetoothDevice d : notPairedDevices){
-            p+=d.getName() + " : "+d.getAddress()+'\n';
+            p=d.getAddress()+'\n';
         }
         for(BluetoothDevice d : pairedDevices){
-            p+=d.getName() + " : "+d.getAddress()+'\n';
+            p=d.getAddress()+'\n';
         }
-        Toast.makeText(this,p,Toast.LENGTH_SHORT).show();
+        FragementPeripheriques f = new FragementPeripheriques(p);
+        //launch the fragment corresponding to playists with a tag in case we want to see its visibility
+        LaunchFragment(f,"FragementPeripheriques");
+    }
+
+    private void LaunchFragment(Fragment frag, String tag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        //set the transition
+        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        //if the container of the fragment is not empty
+        if(!fragmentTransaction.isEmpty()){
+            //we suppress the last fragment
+            fragmentTransaction.remove(fragmentManager.findFragmentByTag(dernierFragement)).commit();
+        }
+        //we add a fragment to the container
+        fragmentTransaction.add(R.id.fragment_container,frag,tag);
+        //then we commit
+        fragmentTransaction.commit();
+        //we update lastFragment
+        dernierFragement = tag;
     }
 
     private void affichagePeripherique() {
@@ -181,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!isGpsEnabled) {
             startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
         }
-        Toast.makeText(this,"AFFICHAGEPERIPHERIQUE : unpaired : "+notPairedDevices.toString(),Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this,"AFFICHAGEPERIPHERIQUE : unpaired : "+notPairedDevices.toString(),Toast.LENGTH_SHORT).show();
         //si le bluetooth est activé
         if(bluetoothManager.getAdapter().isEnabled()){
             //initialisation du set avec les devices connus
@@ -193,7 +217,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 bluetoothManager.getAdapter().cancelDiscovery();
             }
             else{
-                Toast.makeText(this,"Scan des appareils autour de vous ....",Toast.LENGTH_LONG).show();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     switch (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                         case PackageManager.PERMISSION_DENIED:
@@ -208,21 +231,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             break;
                     }
                 }
+                //remplacer par un popup de chargement
+                //Toast.makeText(this,"Scan des appareils autour de vous ....",Toast.LENGTH_LONG).show();
             }
-            // TEST
-            //for(BluetoothDevice bd : notPairedDevices){
-            //    Toast.makeText(this, "nom : "+bd.getName()+"\n@MAC : "+bd.getAddress(),Toast.LENGTH_SHORT).show();
-            //}
             // TEST REUSSI
             //for(BluetoothDevice bd : pairedDevices){
             //    Toast.makeText(this, "nom : "+bd.getName()+"\n@MAC : "+bd.getAddress(),Toast.LENGTH_SHORT).show();
             //}
 
-
-            //on ajoute le tout à l'endroit fait pour
-            /* NOT YET ;-;
-
-            */
         }
         else{
             //le bluetooth n'est pas activé
@@ -250,8 +266,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         unregisterReceiver(receiver);
+        super.onDestroy();
     }
 
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:tag="FragementPeripheriques"
+    tools:context=".FragementPeripheriques"
+    android:background="@color/white">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/fragment_p"
+        android:paddingTop="180dp"
+        android:textColor="@color/black"
+        android:textAlignment="center"
+        android:fontFamily="@font/alegreya_sc_black"
+        android:textSize="15sp"
+        android:layout_weight="1"
+        android:fadeScrollbars="false"
+        android:scrollX="0px"
+        android:scrollY="0px"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:scrollbarSize="20dp"
+        android:scrollbarStyle="outsideOverlay"
+        android:scrollbars="vertical"/>
+
+</FrameLayout>
