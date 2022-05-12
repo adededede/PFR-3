@@ -30,11 +30,11 @@
 
 
     <FrameLayout
-        android:id="@+id/profil_fragment_container"
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#00000000"
-        android:backgroundTint="#00000000"></FrameLayout>
+        android:background="@color/black"
+        android:backgroundTint="#BFF0C4"></FrameLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigation_view"
