@@ -6,6 +6,8 @@ void arretTotal(Servo rouesGauches,Servo RouesDroites);
 void StopPaireDeRoue(Servo paireDeRoue);
 void arretTotal(Servo rouesGauches,Servo RouesDroites,int delai);
 
-void TournerGauche(Servo rouesGauches,Servo RouesDroites );
-void TournerDroite(Servo rouesGauches,Servo RouesDroites );
+void tournerGauche(Servo rouesGauches,Servo rouesDroites,int millisecondeRoueGauches );
+void tournerDroite(Servo rouesDroites,Servo rouesGauches,int millisecondeRoueDroites);
+
+void avancer(Servo rouesDroites,Servo rouesGauches,int millisecondes);
 #endif

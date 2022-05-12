@@ -6,7 +6,7 @@
 /*---------------------------------------------------------------*/
 
 #include "fonctions_robot.h"
-
+#include "fonctions_Moteurs.h"
 Servo sg, sd;
 
 float c1distance = 100;//on met par défaut une valeur non critique pour ne pas entrer
@@ -41,8 +41,7 @@ void setup()
   delay (1000);
 
   //on fait avancer le robot tout droit
-  sg.writeMicroseconds(1580);
-  sd.writeMicroseconds(1580);
+  avancer(sd,sg,1580);
 }//fin setup
 
 void loop() {
@@ -63,17 +62,14 @@ void loop() {
     //retour sonore
     bip();
     //arret
-    sg.writeMicroseconds(1500);
-    sd.writeMicroseconds(1500);
-    delay(500);
+   arretTotal(sg,sd,500);
     //tourne à droite pour éviter obstacle (tourne à 90° a droite)
     sg.writeMicroseconds(1300);
     sd.writeMicroseconds(1600);
     delay(500);
     //on remet le robot droit en marche avant
-    sg.writeMicroseconds(1580);
-    sd.writeMicroseconds(1580);
-  }
+    avancer(sg,sd,1580);
+    }
 
   //pour longer le mur
   else if ((c3distance < 25 && c3distance != 0) || (c2distance < 45 && c2distance != 0)) {
@@ -103,16 +99,13 @@ void loop() {
     //retour sonore
     bip();
     //arret
-    sg.writeMicroseconds(1500);
-    sd.writeMicroseconds(1500);
-    delay(600);
+   arretTotal(sg,sd,1600);
     //tourne à droite pour relonger le du mur (tourne à 90° a gauche)
     sd.writeMicroseconds(1300);
     sg.writeMicroseconds(1600);
     delay(500);
     //on remet le robot droit en marche avant
-    sg.writeMicroseconds(1580);
-    sd.writeMicroseconds(1580);
+    avancer(sg,sd,1580);
   }
 }//fin loop
 
