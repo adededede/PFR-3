@@ -34,7 +34,11 @@ void arretTotal(Servo rouesGauches,Servo RouesDroites,int delai){
   
   rouesDroites.writeMicroseconds(millisecondes);
   rouesGauches.writeMicroseconds(millisecondes);
-  
+ }
+
+  int getVitesse(void ){
+    
+  return 0;
  }
 
 
