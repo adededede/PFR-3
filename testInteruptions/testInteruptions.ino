@@ -7,9 +7,9 @@ void setup() {
   // réglage du port de la LED en mode SORTIE
   pinMode(pin_LED, OUTPUT);
   // Création de l'interruption
-  attachInterrupt(0, blink, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(3), blink, CHANGE);
 
-  pinMode(2, INPUT_PULLUP);
+  pinMode(3, INPUT_PULLUP);
   delay(500);
 }
 
@@ -23,4 +23,5 @@ void loop() {
 
 void blink() { //permet de sortir du while mais attends quand-même la fin du delay
   a = false;
+  Serial.println("INTERACTION");
 }
