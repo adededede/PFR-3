@@ -1,0 +1,40 @@
+char t;
+int pwm;
+void setup() {
+pinMode(8,OUTPUT);   //Moteurs de gauche avancent
+pinMode(9,OUTPUT);   //Moteurs de gauche avancent
+pinMode(11,OUTPUT);   //Moteurs de droite avancent
+pinMode(10,OUTPUT);   //Moteurs de droite avancent
+Serial.begin(9600);
+}
+void loop() {
+if(Serial.available()){
+  t = Serial.read();
+  Serial.println(t);
+}
+if(t == 'Avant'){            // avancer vers l'avant (tous les moteurs roulent à la même direction )
+  digitalWrite(8,HIGH);
+  digitalWrite(11,HIGH);
+}
+else if(t == 'Arriere'){      //avancer vers l'arrière (tous les moteurs roulent à la direction derrière )
+  digitalWrite(9,HIGH);
+  digitalWrite(10,HIGH);
+} 
+else if(t == 'Gauche'){      //tourner à droite (les moteurs de la gauche avancent dans une direction, les moteurs de la droite ne bougent pas)
+  digitalWrite(11,HIGH);
+}
+else if(t == 'Droite'){      //tourner à gauche (les moteurs de la droite avancent dans une direction, les moteurs de la gauche ne bougent pas)
+  digitalWrite(8,HIGH);
+}
+else if(t == 'P'){
+t = Serial.read();
+pwm=t;  
+}
+else if(t == 'Arreter'){      //Arreter tous les moteurs
+  digitalWrite(8,LOW);
+  digitalWrite (9,LOW);
+  digitalWrite(11,LOW);
+  digitalWrite(10,LOW);
+}
+delay(1);
+}                          
