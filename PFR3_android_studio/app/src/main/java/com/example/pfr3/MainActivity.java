@@ -1,5 +1,9 @@
 package com.example.pfr3;
 
+import static android.bluetooth.BluetoothProfile.STATE_CONNECTED;
+import static android.bluetooth.BluetoothProfile.STATE_DISCONNECTED;
+import static android.bluetooth.BluetoothProfile.STATE_DISCONNECTING;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,11 +16,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,14 +28,21 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -67,11 +77,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
                 Toast.makeText(context, "FIN : unpaired : "+notPairedDevices.size(),Toast.LENGTH_SHORT).show();
-                affichagePeripheriques();
+                try {
+                    affichagePeripheriques();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -196,8 +209,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    //Methode du clic des boutons de navigation
+    public void cliqueNaviguer(View view){
+        //verification de la connexion bluetooth
 
-    private void affichagePeripheriques() {
+        //envoyer au robot
+        switch (view.getId()){
+            case R.id.buttonBas:
+                //envoyer le message necessaire
+                Toast.makeText(this,"clic clic bouton bas",Toast.LENGTH_SHORT);
+                break;
+            case R.id.buttonHaut:
+
+                break;
+            case R.id.buttonDroite:
+
+                break;
+            case R.id.buttonGauche:
+                //envoyer le message necessaire
+                Toast.makeText(this,"clic clic bouton gauche",Toast.LENGTH_SHORT);
+                break;
+        }
+    }
+
+
+    private void affichagePeripheriques() throws IOException {
         String p = "";
         BluetoothDevice jimmy = null;
         int index = 0;
@@ -215,12 +251,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         FragementPeripheriques f = new FragementPeripheriques(p);
         ThreadConnexion thread;
-        if(jimmy!=null){
+        if(jimmy!= null){
             thread = new ThreadConnexion(jimmy,telephone);
             thread.run();
         }
 
-        //launch the fragment corresponding to playists with a tag in case we want to see its visibility
+        //lance le fragment des périphériques
         //LaunchFragment(f,"FragementPeripheriques");
     }
 
@@ -311,6 +347,101 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onDestroy() {
         unregisterReceiver(receiver);
         super.onDestroy();
+    }
+
+    public class ThreadConnexion extends Thread{
+        private final BluetoothDevice device;
+        private final BluetoothSocket chaussette;
+        private final UUID telephone;
+        private final InputStream inputStream;
+        private final OutputStream outputStream;
+        private byte[] buffer;
+        private Handler handler;
+        public static final int MESSAGE_READ = 0;
+        public static final int MESSAGE_WRITE = 1;
+        private byte[] navigation;
+
+
+        public ThreadConnexion(BluetoothDevice bd, UUID telephone) throws IOException {
+            device = bd;
+            this.telephone = telephone;
+            BluetoothSocket chaussure = null;
+            InputStream tmpInput = null;
+            OutputStream tmpOutput = null;
+
+            try{
+                //ajouter mon UUID pour pouvoir se connceter (celui de l'app)
+                chaussure = device.createRfcommSocketToServiceRecord(telephone);
+            }
+            catch (IOException e){
+                //ERREUR
+            }
+            chaussette=chaussure;
+            try{
+                tmpInput = chaussette.getInputStream();
+                tmpOutput = chaussette.getOutputStream();
+            }
+            catch(IOException e){
+                //Erreur
+            }
+            inputStream = tmpInput;
+            outputStream=tmpOutput;
+            navigation = new byte[1024];
+        }
+
+        @Override
+        public void run(){
+            try{
+                chaussette.connect();
+            }
+            catch (IOException e){
+                try{
+                    chaussette.close();
+                }
+                catch (IOException e_close){
+                    //ERREUR
+                }
+                return;
+            }
+            gestionConnexion(navigation);
+        }
+
+        private void gestionConnexion(byte[] bytes) {
+            buffer = new byte[1024];
+            int numBytes;
+            ecrire(bytes);
+            while(true){
+                try{
+                    numBytes = inputStream.read(buffer);
+                    Message message = handler.obtainMessage(MESSAGE_READ,numBytes,-1,buffer);
+                    message.sendToTarget();
+                }
+                catch (IOException e){
+                    //erreur
+                    break;
+                }
+            }
+        }
+
+        public void ecrire(byte[] bytes){
+            try {
+                outputStream.write(bytes);
+                Message message = handler.obtainMessage(MESSAGE_WRITE,-1,-1,buffer);
+                message.sendToTarget();
+            }
+            catch (IOException e){
+                //ERREUR
+            }
+        }
+
+        public void cancel(){
+            try{
+                chaussette.close();
+            }
+            catch (IOException e){
+                //ERREUR
+            }
+        }
     }
 
 }

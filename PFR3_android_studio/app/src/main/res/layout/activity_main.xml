@@ -15,26 +15,87 @@
         android:layout_marginTop="40dp"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textApp"
+
+
+            <TextView
+                android:id="@+id/textApp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="170dp"
+                android:layout_marginTop="15dp"
+                android:fontFamily="@font/alegreya_sc_bold"
+                android:text="Jimmy"
+                android:textColor="@color/black"
+                android:textSize="30sp" />
+
+            <TextView
+                android:id="@+id/textCartographie"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="130dp"
+                android:layout_marginTop="100dp"
+                android:fontFamily="@font/alegreya_sc"
+                android:text="Cartographie de Jimmy"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="15sp" />
+
+            <View
+                android:id="@+id/view_cartographie"
+                android:layout_width="346dp"
+                android:layout_height="207dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="10dp" />
+
+            <Button
+                android:id="@+id/buttonHaut"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/ic_up_arrow"
+                android:layout_marginTop="40dp"
+                android:layout_marginLeft="160dp"
+                android:visibility="visible"
+                android:onClick="cliqueNaviguer"/>
+
+        <Button
+            android:id="@+id/buttonGauche"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="110dp"
-            android:layout_marginTop="15dp"
-            android:textColor="@color/black"
-            android:fontFamily="@font/alegreya_sc_bold"
-            android:text=""
-            android:textSize="30sp" />
+            android:layout_weight="1"
+            android:background="@mipmap/ic_left_arrow"
+            android:onClick="cliqueNaviguer"
+            android:visibility="visible" />
+
+            <Button
+                android:id="@+id/buttonDroite"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="160dp"
+                android:layout_weight="1"
+                android:background="@mipmap/ic_right_arrow"
+                android:visibility="visible"
+                android:onClick="cliqueNaviguer" />
+
+            <Button
+                android:id="@+id/buttonBas"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="160dp"
+                android:background="@mipmap/ic_down_arrow"
+                android:visibility="visible"
+                android:onClick="cliqueNaviguer" />
 
     </LinearLayout>
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="#BFF0C4"></FrameLayout>
 
-
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/black"
-        android:backgroundTint="#BFF0C4"></FrameLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigation_view"
