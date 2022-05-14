@@ -7,6 +7,7 @@ import static android.bluetooth.BluetoothProfile.STATE_DISCONNECTING;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.ListMenuItemView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -26,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -48,6 +50,8 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
+    //variable
+    int clicAutomatique,clicManuel = 0;
 
     //Données qu'on prend du design
     DrawerLayout dLayout;
@@ -157,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return deviceUuid;
     }
 
-    private void connexionBluetooth(){
+    private void connexionBluetooth(){;
         if(bluetoothManager.getAdapter() == null){
             //le téléphone ne supporte pas le bluetooth o_O
         }
@@ -177,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!isGpsEnabled) {
             startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
         }
-        Toast.makeText(this,"CONNEXIONBLUETOOTH : unpaired : "+notPairedDevices.toString(),Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this,"CONNEXIONBLUETOOTH : unpaired : "+notPairedDevices.toString(),Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -208,19 +212,59 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch(item.getItemId()){
             //si on selectionné activer
             case R.id.navigation_toolbar_activer:
+                item.setChecked(false);
+                if(!bluetoothManager.getAdapter().isEnabled()){
+                    item.setIcon(R.mipmap.ic_check);
+                }
+                else{
+                    item.setIcon(null);
+                }
                 connexionBluetooth();
                 break;
             //peripheriques
             case R.id.navigation_toolbar_peripherique:
+                item.setChecked(false);
                 affichagePeripherique();
                 break;
             //mode automatique
             case R.id.navigation_toolbar_automatique:
-
+                item.setChecked(false);
+                if(clicAutomatique%2 == 1){
+                    item.setIcon(R.mipmap.ic_mode_on);
+                    this.btnBas.setVisibility(View.VISIBLE);
+                    this.btnHaut.setVisibility(View.VISIBLE);
+                    this.btnGauche.setVisibility(View.VISIBLE);
+                    this.btnDroit.setVisibility(View.VISIBLE);
+                }
+                else{
+                    //remettre l'icon du mode manuel en on
+                    item.setIcon(null);
+                    this.btnBas.setVisibility(View.GONE);
+                    this.btnHaut.setVisibility(View.GONE);
+                    this.btnGauche.setVisibility(View.GONE);
+                    this.btnDroit.setVisibility(View.GONE);
+                }
+                clicAutomatique++;
                 break;
             //mode manuel
             case R.id.navigation_toolbar_manuel:
-
+                item.setChecked(false);
+                if(clicManuel%2 == 1){
+                    //remettre l'icon du mode automatique en on
+                    item.setIcon(null);
+                    this.btnBas.setVisibility(View.GONE);
+                    this.btnHaut.setVisibility(View.GONE);
+                    this.btnGauche.setVisibility(View.GONE);
+                    this.btnDroit.setVisibility(View.GONE);
+                }
+                else{
+                    item.setIcon(R.mipmap.ic_mode_on);
+                    this.btnBas.setVisibility(View.VISIBLE);
+                    this.btnHaut.setVisibility(View.VISIBLE);
+                    this.btnGauche.setVisibility(View.VISIBLE);
+                    this.btnDroit.setVisibility(View.VISIBLE);
+                }
+                clicManuel++;
                 break;
         }
         //on ferme la bar de naviguation

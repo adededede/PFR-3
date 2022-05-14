@@ -26,7 +26,8 @@
             <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/navigation_toolbar_automatique"
-                    android:title="Mode Automatique" />
+                    android:title="Mode Automatique"
+                    android:icon="@mipmap/ic_mode_on"/>
                 <item
                     android:id="@+id/navigation_toolbar_manuel"
                     android:title="Mode Manuel" />
