@@ -16,6 +16,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -33,15 +34,11 @@ import android.os.Message;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -49,7 +46,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
 
     //Données qu'on prend du design
@@ -65,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Set<BluetoothDevice> notPairedDevices = new HashSet<>();
     IntentFilter intentFilter;
     UUID telephone;
+    BluetoothDevice jimmy;
     private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -89,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     };
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,11 +98,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dLayout = findViewById(R.id.drawer_layout);
         nView = findViewById(R.id.navigation_view);
         tBar = findViewById(R.id.toolbar);
-        btnBas = findViewById(R.id.buttonBas);
-        btnHaut = findViewById(R.id.buttonHaut);
-        btnGauche = findViewById(R.id.buttonGauche);
-        btnDroit = findViewById(R.id.buttonDroite);
-        bluetoothManager = (BluetoothManager) getSystemService(BluetoothManager.class);
+        btnBas = findViewById(R.id.btnBas);
+        btnHaut = findViewById(R.id.btnHaut);
+        btnGauche = findViewById(R.id.btnGauche);
+        btnDroit =  findViewById(R.id.btnDroit);
+        bluetoothManager = getSystemService(BluetoothManager.class);
         telephone = getDeviceID(this);
 
         //met la nView au front
@@ -116,6 +115,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //add an event listener to design items
         nView.setNavigationItemSelectedListener(this);
+        btnBas.setOnTouchListener((v, event) -> {
+            if(event.getAction() == MotionEvent.ACTION_DOWN){
+                Toast.makeText(getApplicationContext(),"alons en arrière",Toast.LENGTH_SHORT).show();
+            }
+            if(event.getAction() == MotionEvent.ACTION_UP){
+                Toast.makeText(getApplicationContext(),"stop on ne va plus en arrière",Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        });
 
         //initialisation du filtre de discovery
         //et on lance la recherche de nouveaux appareils
@@ -196,30 +204,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onClick(View v) {
-        //verification de la connexion bluetooth
-        if(bluetoothManager.getAdapter().getState()==BluetoothAdapter.STATE_ON){
-            //envoyer au robot
-            switch (v.getId()){
-                case R.id.buttonBas:
-                    //envoyer le message necessaire
-                    Toast.makeText(this,"clic clic bouton bas",Toast.LENGTH_SHORT);
-                    break;
-                case R.id.buttonHaut:
-
-                    break;
-                case R.id.buttonDroite:
-
-                    break;
-                case R.id.buttonGauche:
-                    //envoyer le message necessaire
-                    Toast.makeText(this,"clic clic bouton gauche",Toast.LENGTH_SHORT);
-                    break;
-            }
-        }
-    }
-
-    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()){
             //si on selectionné activer
@@ -246,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void affichagePeripheriques() throws IOException {
         String p = "";
-        BluetoothDevice jimmy = null;
+        jimmy = null;
         int index = 0;
         for(BluetoothDevice d : notPairedDevices){
             p+=d.getAddress()+'\n';
