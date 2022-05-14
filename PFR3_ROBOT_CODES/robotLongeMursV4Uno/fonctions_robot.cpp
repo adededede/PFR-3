@@ -12,7 +12,7 @@ float lectureCapteurAvant(void) {
 }
 
 float lectureCapteurAvantGauche(void) {
-  delayMicroseconds(2);
+  //delayMicroseconds(2);
   digitalWrite(c2TrigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(c2TrigPin, HIGH);
@@ -23,7 +23,7 @@ float lectureCapteurAvantGauche(void) {
 }
 
 float lectureCapteurLateral(void) {
-  delayMicroseconds(2);
+  //delayMicroseconds(2);
   digitalWrite(c3TrigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(c3TrigPin, HIGH);
