@@ -34,8 +34,10 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
@@ -47,7 +49,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener{
 
 
     //Données qu'on prend du design
@@ -55,13 +57,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView nView;
     androidx.appcompat.widget.Toolbar tBar;
     String dernierFragement;
-    UUID telephone;
+    Button btnGauche,btnDroit, btnBas, btnHaut;
 
     //variable bluetooth
     BluetoothManager bluetoothManager;
     Set<BluetoothDevice> pairedDevices = new HashSet<>();
     Set<BluetoothDevice> notPairedDevices = new HashSet<>();
     IntentFilter intentFilter;
+    UUID telephone;
     private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -89,8 +92,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //mettre en pleine écran
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //initialisation de la vue de l'app
         setContentView(R.layout.activity_main);
 
@@ -98,7 +99,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dLayout = findViewById(R.id.drawer_layout);
         nView = findViewById(R.id.navigation_view);
         tBar = findViewById(R.id.toolbar);
+        btnBas = findViewById(R.id.buttonBas);
+        btnHaut = findViewById(R.id.buttonHaut);
+        btnGauche = findViewById(R.id.buttonGauche);
+        btnDroit = findViewById(R.id.buttonDroite);
         bluetoothManager = (BluetoothManager) getSystemService(BluetoothManager.class);
+        telephone = getDeviceID(this);
 
         //met la nView au front
         nView.bringToFront();
@@ -108,10 +114,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        //add an event lister to the navigation items
+        //add an event listener to design items
         nView.setNavigationItemSelectedListener(this);
-
-        telephone = getDeviceID(this);
 
         //initialisation du filtre de discovery
         //et on lance la recherche de nouveaux appareils
@@ -140,8 +144,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         //num IMEI de mon tel : 861758042792177 ou 861758043102178
         tmSerial = "861758042792177";
-        androidId = android.provider.Settings.Secure.getString(context.getContentResolver(),
-                android.provider.Settings.Secure.ANDROID_ID);
+        androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
         UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
         return deviceUuid;
     }
@@ -171,17 +174,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         //si on clic sur la flech de retour
         //et que la bar de naviguation est ouverte
         if(dLayout.isDrawerOpen(GravityCompat.START)){
             //on ferme la bar de naviguation
             dLayout.closeDrawer((GravityCompat.START));
         }
+        //si on a un fragment en cours
+        else if(!dernierFragement.isEmpty()){
+            //on le supprime et on vide la variable et on deselctionne le drawerlayout
+            fragmentTransaction.remove(fragmentManager.findFragmentByTag(dernierFragement)).commit();
+            dernierFragement="";
+            dLayout.setSelected(false);
+        }
         else{
             //sinon on ferme l'app
             this.finishAffinity();
         }
+    }
 
+    @Override
+    public void onClick(View v) {
+        //verification de la connexion bluetooth
+        if(bluetoothManager.getAdapter().getState()==BluetoothAdapter.STATE_ON){
+            //envoyer au robot
+            switch (v.getId()){
+                case R.id.buttonBas:
+                    //envoyer le message necessaire
+                    Toast.makeText(this,"clic clic bouton bas",Toast.LENGTH_SHORT);
+                    break;
+                case R.id.buttonHaut:
+
+                    break;
+                case R.id.buttonDroite:
+
+                    break;
+                case R.id.buttonGauche:
+                    //envoyer le message necessaire
+                    Toast.makeText(this,"clic clic bouton gauche",Toast.LENGTH_SHORT);
+                    break;
+            }
+        }
     }
 
     @Override
@@ -209,30 +244,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    //Methode du clic des boutons de navigation
-    public void cliqueNaviguer(View view){
-        //verification de la connexion bluetooth
-
-        //envoyer au robot
-        switch (view.getId()){
-            case R.id.buttonBas:
-                //envoyer le message necessaire
-                Toast.makeText(this,"clic clic bouton bas",Toast.LENGTH_SHORT);
-                break;
-            case R.id.buttonHaut:
-
-                break;
-            case R.id.buttonDroite:
-
-                break;
-            case R.id.buttonGauche:
-                //envoyer le message necessaire
-                Toast.makeText(this,"clic clic bouton gauche",Toast.LENGTH_SHORT);
-                break;
-        }
-    }
-
-
     private void affichagePeripheriques() throws IOException {
         String p = "";
         BluetoothDevice jimmy = null;
@@ -257,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         //lance le fragment des périphériques
-        //LaunchFragment(f,"FragementPeripheriques");
+        LaunchFragment(f,"FragementPeripheriques");
     }
 
     private void LaunchFragment(Fragment frag, String tag){

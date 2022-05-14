@@ -56,5 +56,4 @@ public class FragementPeripheriques extends Fragment {
         list.setAdapter(adapter);
         return v;
     }
-
 }
