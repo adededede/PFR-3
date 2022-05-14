@@ -5,8 +5,6 @@
 /* PLACER LE ROBOT PRET D'UN MUR A LA GAUCHE DU ROBOT            */
 /*---------------------------------------------------------------*/
 
-/*PROGRAMME DE LA CARTE DUE*/
-/*FONCTIONNE AVEC UNE 2E CARTE ARDUINO UNO*/
 #include "fonctions_robot.h"
 #include "fonctions_Moteurs.h"
 Servo sg, sd;
@@ -40,6 +38,8 @@ void setup()
   //déclaration des interruptions
   attachInterrupt(digitalPinToInterrupt(11), evitementObstacle, RISING);//quand pin 3 passe de état bas à état haut, execute arretUrgence
   attachInterrupt(digitalPinToInterrupt(12), plusDeMur,  RISING);
+  attachInterrupt(digitalPinToInterrupt(13), redresseDroit, RISING);
+  attachInterrupt(digitalPinToInterrupt(14), redresseGauche, RISING);
 
   //faire 3 bips pour annoncer départ du robot
   bipInitialisation();
@@ -140,13 +140,16 @@ void loop() {
 void evitementObstacle(void) {
   arretTotal(sg, sd, 500);
 }
-
-void plusDeMur(void){
+void plusDeMur(void) {
   arretTotal(sg, sd, 500);
+}
+void redresseDroit(void){
+  //vire à droite
+}
+void redresseGauche(void){
+  //vire à gauche
 }
 
 //problemes
 //peut etre "conflit" entre c2 et c3 car ils regardent tous les 2 le meme mur
 //utiliser millis() pour mesurer continuellement via c1 c2 c3?
-
-//mamaaaaaa ouhouhouhouuuuuuuuuu
