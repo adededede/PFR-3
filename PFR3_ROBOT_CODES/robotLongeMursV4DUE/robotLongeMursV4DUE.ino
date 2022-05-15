@@ -53,43 +53,39 @@ void setup()
 
 void loop() {
 
-  if(isEvitementObstacle){
+  if (isEvitementObstacle) {
     //arret
     arretTotal(sg, sd, 500);
     //tourne à droite pour éviter obstacle (tourne à 90° a droite)
-    sg.writeMicroseconds(1300);
-    sd.writeMicroseconds(1600);
-    delay(650);
+    tournerDroite(sg,sd);
     //on remet le robot droit en marche avant
     avancer(sg, sd, 1580);
     //on prépare la prochaine interruption en cas de d'obstacle
-    isEvitementObstacle=false;
+    isEvitementObstacle = false;
   }
-  else if(isPlusDeMur){//fonctionne si au moins un des deux capteurs voit le mur
+  else if (isPlusDeMur) { //fonctionne si au moins un des deux capteurs voit le mur
     //arret
     arretTotal(sg, sd, 500);
     //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
-    sd.writeMicroseconds(1500);
-    sg.writeMicroseconds(1700);
-    delay(900);
+    tournerGauche(sd,sg);
     //on remet le robot droit en marche avant
     avancer(sg, sd, 1580);
     //on prépare la prochaine interruption en cas d'abscence de mur
-    isPlusDeMur=false;
+    isPlusDeMur = false;
   }
-  else if(isRedresseDroit){
+  else if (isRedresseDroit) {
     sd.writeMicroseconds(1650);
     delay(100);
     sd.writeMicroseconds(1580);
     //on prépare la prochaine interruption en cas de redressage à droite
-    isRedresseDroit=false;
+    isRedresseDroit = false;
   }
-  else if(isRedresseGauche){
+  else if (isRedresseGauche) {
     sg.writeMicroseconds(1650);
     delay(100);
     sg.writeMicroseconds(1580);
     //on prépare la prochaine interruption en cas de redressage à gauche
-    isRedresseGauche=false;
+    isRedresseGauche = false;
   }
 }//fin loop
 
@@ -98,11 +94,11 @@ void evitementObstacle(void) {
   isEvitementObstacle = true;
 }
 void plusDeMur(void) {
-  isPlusDeMur=true;
+  isPlusDeMur = true;
 }
-void redresseDroit(void){
-  isRedresseDroit=true;
+void redresseDroit(void) {
+  isRedresseDroit = true;
 }
-void redresseGauche(void){
-  isRedresseGauche=true;
+void redresseGauche(void) {
+  isRedresseGauche = true;
 }

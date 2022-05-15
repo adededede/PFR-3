@@ -2,37 +2,36 @@
 
 
 
-void StopPaireDeRoue(Servo paireDeRoue){
+void StopPaireDeRoue(Servo paireDeRoue) {
   paireDeRoue.writeMicroseconds(1500);
-  }
+}
 
 
-void arretTotal(Servo rouesGauches,Servo RouesDroites){
+void arretTotal(Servo rouesGauches, Servo RouesDroites) {
   StopPaireDeRoue(rouesGauches);
   StopPaireDeRoue(RouesDroites);
   delay(1000);
-  }
+}
 
-void arretTotal(Servo rouesGauches,Servo RouesDroites,int delai){
+void arretTotal(Servo rouesGauches, Servo RouesDroites, int delai) {
   StopPaireDeRoue(rouesGauches);
   StopPaireDeRoue(RouesDroites);
   delay(delai);
-  }
+}
 
- void tournerGauche(Servo rouesGauches,Servo rouesDroites,int millisecondeRoueGauches ){
-    rouesGauches.writeMicroseconds(millisecondeRoueGauches);
-    rouesDroites.writeMicroseconds(1580);
- }
+void tournerGauche(Servo rouesGauches, Servo rouesDroites) {
+  rouesGauches.writeMicroseconds(1500);
+  rouesDroites.writeMicroseconds(1700);
+  delay(900);
+}
 
- void tournerDroite(Servo rouesDroites,Servo rouesGauches,int millisecondeRoueDroites){
-    rouesDroites.writeMicroseconds(millisecondeRoueDroites);
-    rouesGauches.writeMicroseconds(1580);
- }
+void tournerDroite(Servo rouesDroites, Servo rouesGauches) {
+  rouesDroites.writeMicroseconds(1300);
+  rouesGauches.writeMicroseconds(1600);
+  delay(650);
+}
 
- void avancer(Servo rouesDroites,Servo rouesGauches,int millisecondes){
+void avancer(Servo rouesDroites, Servo rouesGauches, int millisecondes) {
   rouesDroites.writeMicroseconds(millisecondes);
   rouesGauches.writeMicroseconds(millisecondes);
- }
-
-
- 
+}
