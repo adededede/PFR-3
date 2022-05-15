@@ -27,7 +27,7 @@ public class Connexion {
     public static  final int STATE_CONNECTING = 2;
     public static  final int STATE_CONNECTED = 3;
     //private final UUID APP_UUID = UUID.fromString("3657c53d6cadba5f");
-    private final UUID APP_UUID = UUID.randomUUID();
+    private final UUID APP_UUID;
     private ThreadConnexion connexion;
     private ThreadAccepter accepter;
     private ThreadConnecte connecte;
@@ -38,6 +38,7 @@ public class Connexion {
         this.h = handler;
         this.c=context;
 
+        APP_UUID = MainActivity.getDeviceID(c.getApplicationContext());
         state = STATE_NONE;
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }

@@ -56,12 +56,11 @@ public class FragementPeripheriques extends Fragment{
 
         /* LANCEMENT DE LA CONNEXION EN MODE NORMALE
                 NE MARCHE PS ACTUELLEMENT -> le socket se close(), timeout ... => surement à cause de l'uuid
-        String adresse = text.substring(text.length()-18,text.length()-1);
+        String adresse = text.substring(text.length()-18,text.length()-1);*/
         //on stock l'adress de l'item cliqué
         MainActivity main = (MainActivity)getActivity();
-        main.connexion(adresse);
-        //on reviens à la mainactivity*/
-
+        //on reviens à la mainactivity
+        main.connexion("98:D3:91:FD:AD:50");
         getActivity().getFragmentManager().popBackStack();
 
 

@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Set<BluetoothDevice> notPairedDevices = new HashSet<>();
     Set<BluetoothDevice> devices = new HashSet<>();
     IntentFilter intentFilter;
-    UUID telephone;
     BluetoothDevice jimmy;
     private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
     public static final int MESSAGE_STATE_CHANGED = 2;
@@ -140,7 +139,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnGauche = findViewById(R.id.btnGauche);
         btnDroit =  findViewById(R.id.btnDroit);
         bluetoothManager = getSystemService(BluetoothManager.class);
-        telephone = getDeviceID(this);
         connexion = new Connexion(this, handler);
         cartographie = findViewById(R.id.view_cartographie);
 
@@ -173,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final String tmDevice, tmSerial, androidId;
         tmDevice = Settings.Secure.getString(context.getContentResolver(),Settings.Secure.ANDROID_ID);
         //num IMEI de mon tel : 861758042792177 ou 861758043102178
-        tmSerial = "861758042792177";
+        tmSerial = "861758043102178";
         androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
         UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
         return deviceUuid;
