@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class FragementPeripheriques extends Fragment {
+public class FragementPeripheriques extends Fragment{
     private static final Set<BluetoothDevice> tous_peripheriques = null;
     private Set<BluetoothDevice> peripheriques;
 
@@ -45,6 +45,7 @@ public class FragementPeripheriques extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        String text="";
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_affichage_peripheriques, container, false);
         ListView list = v.findViewById(R.id.fragment_p);
@@ -53,16 +54,33 @@ public class FragementPeripheriques extends Fragment {
             if(peripheriques!=null && peripheriques.size()>0){
                 for(BluetoothDevice d : peripheriques){
                     adapter.add("Nom : "+d.getName()+"\n@MAC : "+d.getAddress()+"\n");
+                    if(d.getName()!=null){
+                        if(d.getAddress().equals("F8:DF:15:DE:D2:4F")){
+                            text = "Nom : "+d.getName()+"\n@MAC : "+d.getAddress()+"\n";
+                        }
+                    }
                 }
             }
         }
+        list.setAdapter(adapter);
+
+        String adresse = text.substring(text.length()-18,text.length()-1);
+        //on stock l'adress de l'item cliqué
+        MainActivity main = (MainActivity)getActivity();
+        main.connexion(adresse);
+        //on reviens à la mainactivity
+        getActivity().getFragmentManager().popBackStack();
+
+
+        //TODO UN PUTAIN DE ONCLICK QUI MARCHE!!!
+        //piste -> à cause du fragment ou du drawer menu??
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String text = ((TextView) view).getText().toString();
                 String adresse = text.substring(text.length()-18,text.length()-1);
                 //TODO affiche connexion en cours
-
+                Toast.makeText(getContext(),"clic clic", Toast.LENGTH_SHORT).show();
                 //on stock l'adress de l'item cliqué
                 MainActivity main = (MainActivity)getActivity();
                 main.connexion(adresse);
@@ -70,7 +88,6 @@ public class FragementPeripheriques extends Fragment {
                 getActivity().getFragmentManager().popBackStack();
             }
         });
-        list.setAdapter(adapter);
         return v;
     }
 }

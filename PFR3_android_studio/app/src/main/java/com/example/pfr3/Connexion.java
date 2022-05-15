@@ -193,7 +193,6 @@ public class Connexion {
         }
 
         private synchronized  void echecConnexion(){
-            Toast.makeText(c.getApplicationContext(), "La connexion a échoué",Toast.LENGTH_SHORT).show();
             Connexion.this.start();
         }
 
