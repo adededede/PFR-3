@@ -26,7 +26,8 @@ public class Connexion {
     public static  final int STATE_LISTEN = 1;
     public static  final int STATE_CONNECTING = 2;
     public static  final int STATE_CONNECTED = 3;
-    private final UUID APP_UUID = UUID.fromString("3657C53D6CADBA5F");
+    //private final UUID APP_UUID = UUID.fromString("3657c53d6cadba5f");
+    private final UUID APP_UUID = UUID.randomUUID();
     private ThreadConnexion connexion;
     private ThreadAccepter accepter;
     private int state;

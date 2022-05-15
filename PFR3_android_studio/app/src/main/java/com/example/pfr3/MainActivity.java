@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     BluetoothManager bluetoothManager;
     Set<BluetoothDevice> pairedDevices = new HashSet<>();
     Set<BluetoothDevice> notPairedDevices = new HashSet<>();
+    Set<BluetoothDevice> devices = new HashSet<>();
     IntentFilter intentFilter;
     UUID telephone;
     BluetoothDevice jimmy;
@@ -115,13 +116,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // Discovery has found a device. Get the BluetoothDevice
                 // object and its info from the Intent.
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                Toast.makeText(context, "nom : "+device.getName()+"\n@MAC : "+device.getAddress(),Toast.LENGTH_LONG).show();
+                //Toast.makeText(context, "nom : "+device.getName()+"\n@MAC : "+device.getAddress(),Toast.LENGTH_LONG).show();
                 //on initialise le set contenant les devices inconnus
                 notPairedDevices.add(device);
-                //Toast.makeText(context, "taille unpaired : "+notPairedDevices.size(),Toast.LENGTH_SHORT).show();
             }
             if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
-                Toast.makeText(context, "FIN : unpaired : "+notPairedDevices.size(),Toast.LENGTH_SHORT).show();
                 try {
                     affichagePeripheriques();
                 } catch (IOException e) {
@@ -131,7 +130,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     };
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,15 +158,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //add an event listener to design items
         nView.setNavigationItemSelectedListener(this);
-        btnBas.setOnTouchListener((v, event) -> {
+        /*btnBas.setOnTouchListener((v, event) -> {
             if(event.getAction() == MotionEvent.ACTION_DOWN){
-                Toast.makeText(getApplicationContext(),"alons en arrière",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"allons en arrière",Toast.LENGTH_SHORT).show();
             }
             if(event.getAction() == MotionEvent.ACTION_UP){
                 Toast.makeText(getApplicationContext(),"stop on ne va plus en arrière",Toast.LENGTH_SHORT).show();
             }
             return true;
-        });
+        });*/
 
         //initialisation du filtre de discovery
         //et on lance la recherche de nouveaux appareils
@@ -315,21 +313,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void affichagePeripheriques() throws IOException {
         jimmy = null;
-        if(!notPairedDevices.isEmpty() && notPairedDevices.size()>0){
+        devices.addAll(pairedDevices);
+        devices.addAll(notPairedDevices);
+        Toast.makeText(this,"nb devices : " + devices.size(),Toast.LENGTH_SHORT).show();
+        /*if(!notPairedDevices.isEmpty() && notPairedDevices.size()>0){
             for(BluetoothDevice d : notPairedDevices){
-                // TODO deux listes une pour les paired devices et une pour ceux détectés
-                //ou alors on se dit que c'est oke et que c'est quand l'utilisateur vas vouloir se connecter
-                //qu'on va lui dire non le bluetooth device n'est pas activé
-                if(!pairedDevices.contains(d)){
-                    pairedDevices.add(d);
-                }
-                //if(d.getAddress()=="98:D3:91:FD:AD:50"){
+                if(d.getAddress()=="98:D3:91:FD:AD:50"){
                 jimmy = d;
-                // }
+                }
             }
-        }
+        }*/
 
-        FragementPeripheriques f = new FragementPeripheriques(pairedDevices);
+        FragementPeripheriques f = new FragementPeripheriques(devices);
         //lance le fragment des périphériques
         LaunchFragment(f,"FragementPeripheriques");
     }
