@@ -388,6 +388,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onDestroy();
     }
 
+    public void connexion(String adresse) {
+
+        
+    }
+
     public class ThreadConnexion extends Thread{
         private final BluetoothDevice device;
         private final BluetoothSocket chaussette;

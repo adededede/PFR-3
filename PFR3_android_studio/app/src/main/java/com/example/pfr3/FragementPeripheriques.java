@@ -5,13 +5,17 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +56,20 @@ public class FragementPeripheriques extends Fragment {
                 }
             }
         }
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String text = ((TextView) view).getText().toString();
+                String adresse = text.substring(text.length()-18,text.length()-1);
+                //TODO affiche connexion en cours
+
+                //on stock l'adress de l'item cliqué
+                MainActivity main = (MainActivity)getActivity();
+                main.connexion(adresse);
+                //on reviens à la mainactivity
+                getActivity().getFragmentManager().popBackStack();
+            }
+        });
         list.setAdapter(adapter);
         return v;
     }
