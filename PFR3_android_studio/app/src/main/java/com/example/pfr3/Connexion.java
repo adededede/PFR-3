@@ -30,6 +30,7 @@ public class Connexion {
     private final UUID APP_UUID = UUID.randomUUID();
     private ThreadConnexion connexion;
     private ThreadAccepter accepter;
+    private ThreadConnecte connecte;
     private int state;
     private BluetoothAdapter bluetoothAdapter;
 
@@ -60,6 +61,11 @@ public class Connexion {
             accepter.start();
         }
 
+        if(connecte != null){
+            connecte.cancel();
+            connecte = null;
+        }
+
         setState(STATE_LISTEN);
     }
 
@@ -73,6 +79,11 @@ public class Connexion {
             accepter=null;
         }
 
+        if(connecte != null){
+            connecte.cancel();
+            connecte = null;
+        }
+
         setState(STATE_NONE);
     }
 
@@ -83,8 +94,22 @@ public class Connexion {
         }
         connexion = new ThreadConnexion(device);
         connexion.start();
-
+        if(connecte != null){
+            connecte.cancel();
+            connecte = null;
+        }
         setState(STATE_CONNECTING);
+    }
+
+    public void write(byte[] buffer){
+        ThreadConnecte c;
+        synchronized (this){
+            if(state != STATE_CONNECTED){
+                return;
+            }
+            c = connecte;
+        }
+        c.write(buffer);
     }
 
     private class ThreadAccepter extends Thread{
@@ -201,7 +226,12 @@ public class Connexion {
                 connexion.cancel();
                 connexion = null;
             }
-
+            if(connecte != null){
+                connecte.cancel();
+                connecte = null;
+            }
+            connecte = new ThreadConnecte(chaussette);
+            connecte.start();
             Message message = h.obtainMessage(MainActivity.MESSAGE_DEVICE_NAME);
             Bundle bundle = new Bundle();
             bundle.putString(MainActivity.DEVICE_NAME,d.getName());
@@ -212,5 +242,58 @@ public class Connexion {
         }
     }
 
+    private class ThreadConnecte extends Thread{
+        private final BluetoothSocket chaussette;
+        private  final InputStream flux_entrant;
+        private  final  OutputStream flux_sortant;
+
+        public ThreadConnecte(BluetoothSocket chaussette){
+            this.chaussette = chaussette;
+
+            InputStream tempInput = null;
+            OutputStream tempOutput = null;
+            try{
+                tempInput = chaussette.getInputStream();
+                tempOutput = chaussette.getOutputStream();
+            }
+            catch (IOException e){
+                Log.e("Connected -> Constructeur",e.toString());
+            }
+            flux_entrant=tempInput;
+            flux_sortant=tempOutput;
+        }
+
+        public void run(){
+            byte[] buffer = new byte[1024];
+            int bytes;
+            try{
+                bytes = flux_entrant.read(buffer);
+                h.obtainMessage(MainActivity.MESSAGE_STATE_READ, bytes,-1,buffer).sendToTarget();
+            }
+            catch (IOException e){
+                Log.e("Connected -> Run",e.toString());
+                Connexion.this.start();
+            }
+        }
+
+        public void write(byte[] buffer){
+            try{
+                flux_sortant.write(buffer);
+                h.obtainMessage(MainActivity.MESSAGE_STATE_WRITE,-1,-1,buffer).sendToTarget();
+            }
+            catch (IOException e){
+                Log.e("Connected -> Write",e.toString());
+            }
+        }
+
+        public void cancel(){
+            try{
+                chaussette.close();
+            }
+            catch (IOException e){
+                Log.e("Connected -> Cancel",e.toString());
+            }
+        }
+    }
 }
 

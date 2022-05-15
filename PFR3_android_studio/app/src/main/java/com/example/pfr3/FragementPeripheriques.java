@@ -7,20 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
-
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class FragementPeripheriques extends Fragment{
@@ -64,16 +54,20 @@ public class FragementPeripheriques extends Fragment{
         }
         list.setAdapter(adapter);
 
+        /* LANCEMENT DE LA CONNEXION EN MODE NORMALE
+                NE MARCHE PS ACTUELLEMENT -> le socket se close(), timeout ... => surement à cause de l'uuid
         String adresse = text.substring(text.length()-18,text.length()-1);
         //on stock l'adress de l'item cliqué
         MainActivity main = (MainActivity)getActivity();
         main.connexion(adresse);
-        //on reviens à la mainactivity
+        //on reviens à la mainactivity*/
+
         getActivity().getFragmentManager().popBackStack();
 
 
         //TODO UN PUTAIN DE ONCLICK QUI MARCHE!!!
         //piste -> à cause du fragment ou du drawer menu??
+        //          => REGARDER SUR ANDAPP GITHUB
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

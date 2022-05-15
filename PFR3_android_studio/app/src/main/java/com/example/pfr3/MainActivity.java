@@ -1,13 +1,8 @@
 package com.example.pfr3;
 
-import static android.bluetooth.BluetoothProfile.STATE_CONNECTED;
-import static android.bluetooth.BluetoothProfile.STATE_DISCONNECTED;
-import static android.bluetooth.BluetoothProfile.STATE_DISCONNECTING;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.ListMenuItemView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -15,35 +10,28 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -54,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     int clicAutomatique,clicManuel = 0;
 
     //Données qu'on prend du design
+    View cartographie;
     DrawerLayout dLayout;
     NavigationView nView;
     androidx.appcompat.widget.Toolbar tBar;
@@ -74,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final int MESSAGE_STATE_READ = 3;
     public static final int MESSAGE_STATE_WRITE= 4;
     public static final int MESSAGE_DEVICE_NAME = 5;
-    public static  final String DEVICE_NAME = "DEVICENAME";
+    public static  final String DEVICE_NAME = "DEVICE_NAME";
     private String connecte_a;
 
     private Handler handler = new Handler(new Handler.Callback() {
@@ -98,8 +87,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                     break;
                 case MESSAGE_STATE_READ:
+                    byte[] buffer_e = (byte[]) msg.obj;
+                    String entree = new String(buffer_e,0,msg.arg1);
+                    Toast.makeText(getApplicationContext(),"RECU : "+entree,Toast.LENGTH_SHORT).show();
                     break;
                 case MESSAGE_STATE_WRITE:
+                    byte[] buffer_s = (byte[])msg.obj;
+                    String sortie = new String(buffer_s);
+                    Toast.makeText(getApplicationContext(),"ENVOIE : "+sortie,Toast.LENGTH_SHORT).show();
                     break;
                 case MESSAGE_DEVICE_NAME:
                     connecte_a = msg.getData().getString(DEVICE_NAME);
@@ -147,6 +142,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bluetoothManager = getSystemService(BluetoothManager.class);
         telephone = getDeviceID(this);
         connexion = new Connexion(this, handler);
+        cartographie = findViewById(R.id.view_cartographie);
+
+        //on cache les boutons de commandes
+        btnDroit.setVisibility(View.GONE);
+        btnGauche.setVisibility(View.GONE);
+        btnHaut.setVisibility(View.GONE);
+        btnBas.setVisibility(View.GONE);
 
         //met la nView au front
         nView.bringToFront();
@@ -158,15 +160,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //add an event listener to design items
         nView.setNavigationItemSelectedListener(this);
-        /*btnBas.setOnTouchListener((v, event) -> {
-            if(event.getAction() == MotionEvent.ACTION_DOWN){
-                Toast.makeText(getApplicationContext(),"allons en arrière",Toast.LENGTH_SHORT).show();
-            }
-            if(event.getAction() == MotionEvent.ACTION_UP){
-                Toast.makeText(getApplicationContext(),"stop on ne va plus en arrière",Toast.LENGTH_SHORT).show();
-            }
-            return true;
-        });*/
 
         //initialisation du filtre de discovery
         //et on lance la recherche de nouveaux appareils
@@ -177,22 +170,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public static UUID getDeviceID(Context context) {
-        final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         final String tmDevice, tmSerial, androidId;
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            tmDevice = Settings.Secure.getString(
-                    context.getContentResolver(),
-                    Settings.Secure.ANDROID_ID);
-        } else {
-            final TelephonyManager mTelephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            if (mTelephony.getDeviceId() != null) {
-                tmDevice = mTelephony.getDeviceId();
-            } else {
-                tmDevice = Settings.Secure.getString(
-                        context.getContentResolver(),
-                        Settings.Secure.ANDROID_ID);
-            }
-        }
+        tmDevice = Settings.Secure.getString(context.getContentResolver(),Settings.Secure.ANDROID_ID);
         //num IMEI de mon tel : 861758042792177 ou 861758043102178
         tmSerial = "861758042792177";
         androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
@@ -267,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             //mode automatique
             case R.id.navigation_toolbar_automatique:
+                connexion.write("prout".getBytes());
                 item.setChecked(false);
                 if(clicAutomatique%2 == 1){
                     item.setIcon(R.mipmap.ic_mode_on);
@@ -316,7 +296,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         devices.addAll(pairedDevices);
         devices.addAll(notPairedDevices);
         Toast.makeText(this,"nb devices : " + devices.size(),Toast.LENGTH_SHORT).show();
-        /*if(!notPairedDevices.isEmpty() && notPairedDevices.size()>0){
+       /*
+       //Connexion a Jimmy directe
+        if(!notPairedDevices.isEmpty() && notPairedDevices.size()>0){
             for(BluetoothDevice d : notPairedDevices){
                 if(d.getAddress()=="98:D3:91:FD:AD:50"){
                 jimmy = d;
@@ -375,7 +357,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             break;
                         case PackageManager.PERMISSION_GRANTED:
                             boolean a = bluetoothManager.getAdapter().startDiscovery();
-                            Toast.makeText(MainActivity.this, "Start discovery : "+a, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(MainActivity.this, "Start discovery : "+a, Toast.LENGTH_SHORT).show();
                             break;
                     }
                 }
@@ -403,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     boolean a = bluetoothManager.getAdapter().startDiscovery();
-                    Toast.makeText(MainActivity.this, "Start discovery : " + a, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Start discovery : " + a, Toast.LENGTH_SHORT).show();
                 } else {
                     //exit application or do the needful
                 }
