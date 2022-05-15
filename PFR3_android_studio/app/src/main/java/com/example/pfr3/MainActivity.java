@@ -273,22 +273,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void affichagePeripheriques() throws IOException {
-        String p = "";
         jimmy = null;
-        int index = 0;
-        for(BluetoothDevice d : notPairedDevices){
-            p+=d.getAddress()+'\n';
-            //if(d.getAddress()=="98:D3:91:FD:AD:50"){
+        if(!notPairedDevices.isEmpty() && notPairedDevices.size()>0){
+            for(BluetoothDevice d : notPairedDevices){
+                // TODO deux listes une pour les paired devices et une pour ceux détectés
+                //ou alors on se dit que c'est oke et que c'est quand l'utilisateur vas vouloir se connecter
+                //qu'on va lui dire non le bluetooth device n'est pas activé
+                if(!pairedDevices.contains(d)){
+                    pairedDevices.add(d);
+                }
+                //if(d.getAddress()=="98:D3:91:FD:AD:50"){
                 jimmy = d;
-           // }
-        }
-        for(BluetoothDevice d : pairedDevices){
-            p+=d.getAddress()+'\n';
-            if(d.getAddress()=="98:D3:91:FD:AD:50"){
-                jimmy = d;
+                // }
             }
         }
-        FragementPeripheriques f = new FragementPeripheriques(p);
+
+        FragementPeripheriques f = new FragementPeripheriques(pairedDevices);
         ThreadConnexion thread;
         if(jimmy!= null){
             thread = new ThreadConnexion(jimmy,telephone);
