@@ -1,5 +1,4 @@
-
-#include <newSoftwareSerial.h>
+#include <SoftwareSerial.h>
 
 // UTILISER CA
 SoftwareSerial mavoieserie(10, 11); // (TX, RX)
