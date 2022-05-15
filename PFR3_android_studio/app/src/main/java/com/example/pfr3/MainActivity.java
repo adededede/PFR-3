@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Button btnGauche,btnDroit, btnBas, btnHaut;
 
     //variable bluetooth
+    Connexion connexion;
     BluetoothManager bluetoothManager;
     Set<BluetoothDevice> pairedDevices = new HashSet<>();
     Set<BluetoothDevice> notPairedDevices = new HashSet<>();
@@ -68,6 +69,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     UUID telephone;
     BluetoothDevice jimmy;
     private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
+    public static final int MESSAGE_STATE_CHANGED = 2;
+    public static final int MESSAGE_STATE_READ = 3;
+    public static final int MESSAGE_STATE_WRITE= 4;
+    public static final int MESSAGE_DEVICE_NAME = 5;
+    public static  final String DEVICE_NAME = "DEVICENAME";
+    private String connecte_a;
+
+    private Handler handler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            switch(msg.what){
+                case MESSAGE_STATE_CHANGED:
+                    switch (msg.arg1){
+                        case Connexion.STATE_NONE:
+                            toast("PAS CONNECTE");
+                            break;
+                        case Connexion.STATE_CONNECTED:
+                            toast("CONNECTE");
+                            break;
+                        case Connexion.STATE_CONNECTING:
+                            toast("CONNEXION EN COURS");
+                            break;
+                        case Connexion.STATE_LISTEN:
+                            toast("ECOUTE");
+                            break;
+                    }
+                    break;
+                case MESSAGE_STATE_READ:
+                    break;
+                case MESSAGE_STATE_WRITE:
+                    break;
+                case MESSAGE_DEVICE_NAME:
+                    connecte_a = msg.getData().getString(DEVICE_NAME);
+                    break;
+            }
+            return false;
+        }
+    });
+
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -108,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnDroit =  findViewById(R.id.btnDroit);
         bluetoothManager = getSystemService(BluetoothManager.class);
         telephone = getDeviceID(this);
+        connexion = new Connexion(this, handler);
 
         //met la nView au front
         nView.bringToFront();
@@ -289,12 +330,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         FragementPeripheriques f = new FragementPeripheriques(pairedDevices);
-        ThreadConnexion thread;
-        if(jimmy!= null){
-            thread = new ThreadConnexion(jimmy,telephone);
-            thread.run();
-        }
-
         //lance le fragment des périphériques
         LaunchFragment(f,"FragementPeripheriques");
     }
@@ -384,108 +419,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(receiver);
         super.onDestroy();
+        unregisterReceiver(receiver);
+        if(connexion!=null){
+            connexion.stop();
+        }
+    }
+
+    public void toast(String s){
+        Toast.makeText(this, s,Toast.LENGTH_SHORT).show();
     }
 
     public void connexion(String adresse) {
-
-        
+        connexion.connexion(bluetoothManager.getAdapter().getRemoteDevice(adresse));
     }
 
-    public class ThreadConnexion extends Thread{
-        private final BluetoothDevice device;
-        private final BluetoothSocket chaussette;
-        private final UUID telephone;
-        private final InputStream inputStream;
-        private final OutputStream outputStream;
-        private byte[] buffer;
-        private Handler handler;
-        public static final int MESSAGE_READ = 0;
-        public static final int MESSAGE_WRITE = 1;
-        private byte[] navigation;
-
-
-        public ThreadConnexion(BluetoothDevice bd, UUID telephone) throws IOException {
-            device = bd;
-            this.telephone = telephone;
-            BluetoothSocket chaussure = null;
-            InputStream tmpInput = null;
-            OutputStream tmpOutput = null;
-
-            try{
-                //ajouter mon UUID pour pouvoir se connceter (celui de l'app)
-                chaussure = device.createRfcommSocketToServiceRecord(telephone);
-            }
-            catch (IOException e){
-                //ERREUR
-            }
-            chaussette=chaussure;
-            try{
-                tmpInput = chaussette.getInputStream();
-                tmpOutput = chaussette.getOutputStream();
-            }
-            catch(IOException e){
-                //Erreur
-            }
-            inputStream = tmpInput;
-            outputStream=tmpOutput;
-            navigation = new byte[1024];
-        }
-
-        @Override
-        public void run(){
-            try{
-                chaussette.connect();
-            }
-            catch (IOException e){
-                try{
-                    chaussette.close();
-                }
-                catch (IOException e_close){
-                    //ERREUR
-                }
-                return;
-            }
-            gestionConnexion(navigation);
-        }
-
-        private void gestionConnexion(byte[] bytes) {
-            buffer = new byte[1024];
-            int numBytes;
-            ecrire(bytes);
-            while(true){
-                try{
-                    numBytes = inputStream.read(buffer);
-                    Message message = handler.obtainMessage(MESSAGE_READ,numBytes,-1,buffer);
-                    message.sendToTarget();
-                }
-                catch (IOException e){
-                    //erreur
-                    break;
-                }
-            }
-        }
-
-        public void ecrire(byte[] bytes){
-            try {
-                outputStream.write(bytes);
-                Message message = handler.obtainMessage(MESSAGE_WRITE,-1,-1,buffer);
-                message.sendToTarget();
-            }
-            catch (IOException e){
-                //ERREUR
-            }
-        }
-
-        public void cancel(){
-            try{
-                chaussette.close();
-            }
-            catch (IOException e){
-                //ERREUR
-            }
-        }
-    }
 
 }
