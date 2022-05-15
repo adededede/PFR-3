@@ -3,34 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:descendantFocusability="blocksDescendants"
     android:tag="FragementPeripheriques"
     tools:context=".FragementPeripheriques"
     android:background="@color/white">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/titre_listeview"
-        android:layout_marginTop="55dp"
-        android:fontFamily="@font/alegreya_sc_black_italic"
-        android:textSize="20sp"
-        android:textAlignment="center"
-        android:text="Voici les appareils bluetooth dans les alentours ou déjà appareillés :"/>
-
-    <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/fragment_p"
-        android:paddingTop="130dp"
-        android:textColor="@color/black"
+        android:layout_marginTop="55dp"
+        android:fontFamily="@font/alegreya_sc_black_italic"
+        android:text="Voici les appareils bluetooth dans les alentours ou déjà appareillés :"
         android:textAlignment="center"
-        android:fontFamily="@font/alegreya_sc_black"
-        android:textSize="15sp"
-        android:layout_marginLeft="10dp"
-        android:scrollbars="vertical"
-        android:clickable="false"
-        android:focusable="false"
-        android:focusableInTouchMode="false"/>
+        android:textSize="20sp" />
+
+    <ListView
+        android:id="@+id/fragment_p"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:paddingTop="120dp" />
 
 </FrameLayout>
