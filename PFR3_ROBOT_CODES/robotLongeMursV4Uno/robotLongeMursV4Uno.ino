@@ -10,8 +10,8 @@
    CRITIQUE EST MESUREE
 */
 /*
- * FAIRE UN SYSTEME DE SITRIBUTION DE PAROLE POUR NE PAS ENVOYER PLUSIEURS INTERRUPTIONS A LA FOIS
- */
+   FAIRE UN SYSTEME DE SITRIBUTION DE PAROLE POUR NE PAS ENVOYER PLUSIEURS INTERRUPTIONS A LA FOIS
+*/
 
 #include "fonctions_robot.h"
 #include "fonctions_Moteurs.h"
@@ -31,9 +31,6 @@ const int redresseGPin = 12;
 void setup() {
   Serial.begin(9600);
 
-  sg.attach(9);   //  paire droite
-  sd.attach(10);  // paire gauche (oui il y a inversion)
-
   pinMode(c1TrigPin, OUTPUT);
   pinMode(c1EchoPin, INPUT);
   pinMode(c2TrigPin, OUTPUT);
@@ -43,21 +40,25 @@ void setup() {
 
   pinMode(obstaclePin, OUTPUT);
   pinMode(plusDeMurPin, OUTPUT);
+  pinMode(redresseDPin, OUTPUT);
+  pinMode(redresseGPin, OUTPUT);
 
-  //met les pins à LOW car ils déclenchent interuption à leur passage à HIGH
-  digitalWrite(obstaclePin, LOW);
-  digitalWrite(plusDeMurPin, LOW);
+  //met les pins à HIGH car ils déclenchent interuption à leur passage à LOW
+  digitalWrite(obstaclePin, HIGH);
+  digitalWrite(plusDeMurPin, HIGH);
+  digitalWrite(redresseDPin, HIGH);
+  digitalWrite(redresseGPin, HIGH);
 
   /*
-  //calcul temps de mesure capteurs (SANS CAPTEURS)
-  long int t1 = millis();
-  c1distance = lectureCapteurAvant();//693
-  //c2distance = lectureCapteurAvantGauche();//693ms
-  //c3distance = lectureCapteurLateral();//693
-  long int t2 = millis();
-  Serial.print("Time taken by the task: ");
-  Serial.print(t2 - t1);
-  Serial.println(" milliseconds");*/
+    //calcul temps de mesure capteurs (SANS CAPTEURS)
+    long int t1 = millis();
+    c1distance = lectureCapteurAvant();//693
+    //c2distance = lectureCapteurAvantGauche();//693ms
+    //c3distance = lectureCapteurLateral();//693
+    long int t2 = millis();
+    Serial.print("Time taken by the task: ");
+    Serial.print(t2 - t1);
+    Serial.println(" milliseconds");*/
 
 
 }  //fin setup
@@ -68,43 +69,55 @@ void loop() {
   /*
      TEST sans delay entre les mesures, a voir si ça ne parasite pas les mesures
   */
-  
+
   c1distance = lectureCapteurAvant();
   c2distance = lectureCapteurAvantGauche();
   c3distance = lectureCapteurLateral();
 
   diffLaterale = c2distance - c3distance;
+  /*Serial.println(c1distance);
+    Serial.println(c2distance);
+    Serial.println(c3distance);
+    Serial.println(diffLaterale);
+    Serial.println("");*/
+
+
 
   //evitement d'obstacle PRIORITAIRE
-  if (c1distance < 40 && c1distance > 5 ) { //pour eviter les valeurs extremes en cas de non detection de mur
-    digitalWrite(obstaclePin, HIGH);//déclenche une interruption sur le programme principal de la DUE
+  if (c1distance < 20 && c1distance > 5 ) { //pour eviter les valeurs extremes en cas de non detection de mur
+    digitalWrite(obstaclePin, LOW);//déclenche une interruption sur le programme principal de la DUE
     delay(50);
-    digitalWrite(obstaclePin, LOW);//prépare le prochain passage à HIGH
+    digitalWrite(obstaclePin, HIGH);//prépare le prochain passage à HIGH
+    //Serial.println("obstacle");
   }
 
   //si "plus de mur à gauche" alors tourne de 90° à gauche
   else if (c2distance >= 60 && c3distance >= 60) {
-    digitalWrite(plusDeMurPin, HIGH);
-    delay(50);
     digitalWrite(plusDeMurPin, LOW);
+    delay(50);
+    digitalWrite(plusDeMurPin, HIGH);
+    //Serial.println("plus de mur");
   }
 
   //pour rester parallèle au mur
   /*
-     RISQUE DE RALENTIR LE PROGRAMME
+    RISQUE DE RALENTIR LE PROGRAMME
   */
   //declenche "redresseGauche" dans le programme de la DUE
   //diffLaterale < 15 pour éviter le cas où un seul capteur voit le mur après interruption "plusDeMur" dans le programme DUE
-  else if (diffLaterale > 0 && abs(diffLaterale)> 5 && diffLaterale < 15 ){//si positif, alors robot trop vers la droite 
-    digitalWrite(redresseGPin, HIGH);
-    delay(50);
+  else if ((diffLaterale > 0 && diffLaterale < 5) || c2distance > 30 || c3distance > 30 ) { //si positif, alors robot trop vers la droite
     digitalWrite(redresseGPin, LOW);
+    delay(50);
+    digitalWrite(redresseGPin, HIGH);
+    //Serial.println("redresse gauche");
   }
   //declenche "redresseDroit" dans le programme de la DUE
   //diffLaterale < 15 pour la même raison
-  else if(diffLaterale < 0 && abs(diffLaterale)> 5 && diffLaterale < 15){//si négatif, alors robot trop vers la gauche
-    digitalWrite(redresseDPin, HIGH);
-    delay(50);
+  else if ((diffLaterale < 0 && diffLaterale < 10) || c2distance < 15 || c3distance < 15) { //si négatif, alors robot trop vers la gauche
     digitalWrite(redresseDPin, LOW);
+    delay(50);
+    digitalWrite(redresseDPin, HIGH);
+    //Serial.println("redresse droit");
   }
+
 }//fin loop

@@ -22,7 +22,7 @@ void arretTotal(Servo rouesGauches, Servo RouesDroites, int delai) {
 void tournerGauche(Servo rouesGauches, Servo rouesDroites) {
   rouesGauches.writeMicroseconds(1500);
   rouesDroites.writeMicroseconds(1700);
-  delay(900);
+  delay(950);
 }
 
 void tournerDroite(Servo rouesDroites, Servo rouesGauches) {
