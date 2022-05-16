@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -180,6 +182,7 @@ public class Connexion {
                 Log.e("Connect -> Constructeur",e.toString());
             }
             chaussette=chaussure;
+            Toast.makeText(c, chaussette.toString(), Toast.LENGTH_SHORT).show();
         }
 
         public void run(){

@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             toast("CONNEXION EN COURS");
                             break;
                         case Connexion.STATE_LISTEN:
-                            toast("PAS CONNECTE");
+                            toast("PAS CONNECTE, LISTEN");
                             break;
                     }
                     break;
