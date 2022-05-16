@@ -15,7 +15,7 @@
 
 #include "fonctions_robot.h"
 #include "fonctions_Moteurs.h"
-
+#include "bluetooth.h"
 Servo sg, sd;
 
 float c1distance = 100;  //on met par défaut une valeur non critique pour ne pas entrer
