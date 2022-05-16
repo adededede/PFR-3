@@ -37,6 +37,11 @@ import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+    //https://stackoverflow.com/questions/18657427/ioexception-read-failed-socket-might-closed-bluetooth-on-android-4-3
+    //https://github.com/edufolly/flutter_bluetooth_serial/issues/18
+    //https://www.youtube.com/watch?v=TLXpDY1pItQ
+    //https://www.youtube.com/watch?v=Kfe3IYhiKFo
+    //https://www.geeksforgeeks.org/all-about-hc-05-bluetooth-module-connection-with-android/
 
     //variable
     int clicAutomatique,clicManuel = 0;
@@ -167,13 +172,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         registerReceiver(receiver, intentFilter);
     }
 
-    public static UUID getDeviceID(Context context) {
+    public static UUID getDeviceId(Context context) {
+        /*TelephonyManager telephonyManager;
+        telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        String deviceId = telephonyManager.getDeviceId();*/
+
         final String tmDevice, tmSerial, androidId;
-        tmDevice = Settings.Secure.getString(context.getContentResolver(),Settings.Secure.ANDROID_ID);
-        //num IMEI de mon tel : 861758042792177 ou 861758043102178
+        //num IMEI de mon tel : 861758043102178
         tmSerial = "861758043102178";
         androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        UUID deviceUuid = new UUID(androidId.hashCode(),  tmSerial.hashCode());
         return deviceUuid;
     }
 
@@ -244,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             //mode automatique
             case R.id.navigation_toolbar_automatique:
+                connexion.connexion(bluetoothManager.getAdapter().getRemoteDevice("98:D3:91:FD:AD:50"));
                 connexion.write("prout".getBytes());
                 item.setChecked(false);
                 if(clicAutomatique%2 == 1){
