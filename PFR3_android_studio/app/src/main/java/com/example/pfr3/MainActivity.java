@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import android.Manifest;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -29,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import java.io.IOException;
@@ -68,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final int MESSAGE_STATE_READ = 3;
     public static final int MESSAGE_STATE_WRITE= 4;
     public static final int MESSAGE_DEVICE_NAME = 5;
-    public static  final String DEVICE_NAME = "DEVICE_NAME";
+    public static  final String DEVICE_NAME = "";
     private String connecte_a;
 
     private Handler handler = new Handler(new Handler.Callback() {
@@ -78,15 +81,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 case MESSAGE_STATE_CHANGED:
                     switch (msg.arg1){
                         case Connexion.STATE_NONE:
+                            setState("PAS CONNECTE");
                             Toast.makeText(getApplicationContext(),"PAS CONNECTE",Toast.LENGTH_SHORT).show();
                             break;
                         case Connexion.STATE_CONNECTED:
+                            setState("CONNECTE : "+connecte_a);
                             Toast.makeText(getApplicationContext(),"CONNECTE",Toast.LENGTH_SHORT).show();
                             break;
                         case Connexion.STATE_CONNECTING:
+                            setState("CONNEXION EN COURS...");
                             Toast.makeText(getApplicationContext(),"CONNEXION EN COURS",Toast.LENGTH_SHORT).show();
                             break;
                         case Connexion.STATE_LISTEN:
+                            setState("PAS CONNECTE, LISTEN");
                             Toast.makeText(getApplicationContext(),"PAS CONNECTE, LISTEN",Toast.LENGTH_SHORT).show();
                             break;
                     }
@@ -103,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     break;
                 case MESSAGE_DEVICE_NAME:
                     connecte_a = msg.getData().getString(DEVICE_NAME);
+                    Toast.makeText(getApplicationContext(),"DEVICE : "+connecte_a,Toast.LENGTH_SHORT).show();
                     break;
             }
             return false;
@@ -203,11 +211,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         registerReceiver(receiver, intentFilter);
     }
 
-    public static UUID getDeviceId(Context context) {
-        /*TelephonyManager telephonyManager;
-        telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        String deviceId = telephonyManager.getDeviceId();*/
+    private void setState(CharSequence c){
+        Toast.makeText(this,c,Toast.LENGTH_SHORT).show();
+    }
 
+    public static UUID getDeviceId(Context context) {
         final String tmDevice, tmSerial, androidId;
         //num IMEI de mon tel : 861758043102178
         tmSerial = "861758043102178";
