@@ -5,14 +5,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.graphics.BlendMode;
-import android.nfc.cardemulation.HostNfcFService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,14 +16,13 @@ import java.util.UUID;
 
 public class Connexion {
     private final Handler h;
+    private final UUID APP_UUID;
     private Context c;
 
     public static final int STATE_NONE = 0;
     public static  final int STATE_LISTEN = 1;
     public static  final int STATE_CONNECTING = 2;
     public static  final int STATE_CONNECTED = 3;
-    //private final UUID APP_UUID = UUID.fromString("3657c53d6cadba5f");
-    private final UUID APP_UUID;
     private ThreadConnexion connexion;
     private ThreadAccepter accepter;
     private ThreadConnecte connecte;
@@ -38,9 +33,9 @@ public class Connexion {
         this.h = handler;
         this.c=context;
 
-        APP_UUID = MainActivity.getDeviceID(c.getApplicationContext());
         state = STATE_NONE;
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        APP_UUID = MainActivity.getDeviceId(c);
     }
 
     public  int getState(){
@@ -61,7 +56,6 @@ public class Connexion {
             accepter = new ThreadAccepter();
             accepter.start();
         }
-
         if(connecte != null){
             connecte.cancel();
             connecte = null;
@@ -75,6 +69,7 @@ public class Connexion {
             connexion.cancel();
             connexion=null;
         }
+
         if (accepter!=null){
             accepter.cancel();
             accepter=null;
@@ -179,7 +174,7 @@ public class Connexion {
 
             BluetoothSocket chaussure = null;
             try{
-                chaussure = device.createRfcommSocketToServiceRecord(APP_UUID);
+                chaussure =  d.createInsecureRfcommSocketToServiceRecord(APP_UUID);
             }
             catch(IOException e){
                 Log.e("Connect -> Constructeur",e.toString());
