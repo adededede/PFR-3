@@ -1,6 +1,7 @@
 package com.example.pfr3;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,14 +54,19 @@ public class FragementPeripheriques extends Fragment{
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String text = ((TextView) view).getText().toString();
                 String adresse = text.substring(text.length()-18,text.length()-1);
+                String nom="";
+                for(int i = 6; i < text.length(); i++){
+                    if(text.charAt(i)=='\n'){
+                        break;
+                    }
+                    nom+=text.charAt(i);
+                }
                 //TODO affiche connexion en cours
                 Toast.makeText(getContext(),"connexion vers "+adresse, Toast.LENGTH_SHORT).show();
-                //on stock l'adress de l'item cliqué
-                MainActivity main = (MainActivity)getActivity();
-                main.connexion(adresse);
-
-                //on reviens à la mainactivity
-                //getActivity().getFragmentManager().popBackStack();
+                Intent intent = new Intent(getContext(),MainActivity.class);
+                intent.putExtra("connecte_a",nom);
+                intent.putExtra("addresse_mac",adresse);
+                getContext().startActivity(intent);
             }
         });
         return v;

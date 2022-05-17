@@ -14,6 +14,7 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,8 +24,10 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +35,8 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -54,64 +59,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     String dernierFragement;
     Button btnGauche,btnDroit, btnBas, btnHaut;
 
-    //variable bluetooth
-    Connexion connexion;
+    //donnees bluetooth
     BluetoothManager bluetoothManager;
+    public static BluetoothSocket chaussette;
     Set<BluetoothDevice> pairedDevices = new HashSet<>();
     Set<BluetoothDevice> notPairedDevices = new HashSet<>();
     Set<BluetoothDevice> devices = new HashSet<>();
     IntentFilter intentFilter;
-    BluetoothDevice jimmy;
     private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
-    public static final int MESSAGE_STATE_CHANGED = 2;
-    public static final int MESSAGE_STATE_READ = 3;
-    public static final int MESSAGE_STATE_WRITE= 4;
-    public static final int MESSAGE_DEVICE_NAME = 5;
-    public static  final String DEVICE_NAME = "";
+    public static final int STATE_READ = 3;
+    public static final int STATE_WRITE= 4;
+    public static final int STATE_CONNEXION = 5;
     private String connecte_a;
+    private String addresse_mac;
+    public static ThreadConnexion thread_connexion;
+    public static ThreadConnecte thread_connecte;
 
-    private Handler handler = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(@NonNull Message msg) {
-            switch(msg.what){
-                case MESSAGE_STATE_CHANGED:
-                    switch (msg.arg1){
-                        case Connexion.STATE_NONE:
-                            setState("PAS CONNECTE");
-                            Toast.makeText(getApplicationContext(),"PAS CONNECTE",Toast.LENGTH_SHORT).show();
-                            break;
-                        case Connexion.STATE_CONNECTED:
-                            setState("CONNECTE : "+connecte_a);
-                            Toast.makeText(getApplicationContext(),"CONNECTE",Toast.LENGTH_SHORT).show();
-                            break;
-                        case Connexion.STATE_CONNECTING:
-                            setState("CONNEXION EN COURS...");
-                            Toast.makeText(getApplicationContext(),"CONNEXION EN COURS",Toast.LENGTH_SHORT).show();
-                            break;
-                        case Connexion.STATE_LISTEN:
-                            setState("PAS CONNECTE, LISTEN");
-                            Toast.makeText(getApplicationContext(),"PAS CONNECTE, LISTEN",Toast.LENGTH_SHORT).show();
-                            break;
-                    }
-                    break;
-                case MESSAGE_STATE_READ:
-                    byte[] buffer_e = (byte[]) msg.obj;
-                    String entree = new String(buffer_e,0,msg.arg1);
-                    Toast.makeText(getApplicationContext(),"RECU : "+entree,Toast.LENGTH_SHORT).show();
-                    break;
-                case MESSAGE_STATE_WRITE:
-                    byte[] buffer_s = (byte[])msg.obj;
-                    String sortie = new String(buffer_s);
-                    Toast.makeText(getApplicationContext(),"ENVOIE : "+sortie,Toast.LENGTH_SHORT).show();
-                    break;
-                case MESSAGE_DEVICE_NAME:
-                    connecte_a = msg.getData().getString(DEVICE_NAME);
-                    Toast.makeText(getApplicationContext(),"DEVICE : "+connecte_a,Toast.LENGTH_SHORT).show();
-                    break;
-            }
-            return false;
-        }
-    });
+    public static Handler handler;
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -149,8 +113,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnGauche = findViewById(R.id.btnGauche);
         btnDroit =  findViewById(R.id.btnDroit);
         bluetoothManager = getSystemService(BluetoothManager.class);
-        connexion = new Connexion(this, handler,getDeviceId(this));
+        //connexion = new Connexion(this, handler,getDeviceId(this));
         cartographie = findViewById(R.id.view_cartographie);
+        handler = new Handler(Looper.getMainLooper()){
+            @Override
+            public void handleMessage(Message message){
+                switch(message.what){
+                    case STATE_CONNEXION:
+                        switch (message.arg1){
+                            case 1:
+                                //Connecté à
+                                break;
+                            case -1:
+                                //echec de la connexion
+                                break;
+                        }
+                        break;
+                    case STATE_READ:
+                        String recu = message.obj.toString();
+                        switch (recu.toLowerCase()){
+                            //case on recoit une vitesse:
+                            //  on fait ça
+                            //  break;
+                        }
+                        break;
+                }
+            }
+        };
 
         //on cache les boutons de commandes
         btnDroit.setVisibility(View.GONE);
@@ -205,6 +194,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(receiver, intentFilter);
+
+        connecte_a = getIntent().getStringExtra("connecte_a");
+        if(connecte_a != null){
+            addresse_mac = getIntent().getStringExtra("addresse_mac");
+        }
+        if(addresse_mac != null){
+            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+            thread_connexion = new ThreadConnexion(adapter,addresse_mac);
+            thread_connexion.start();
+        }
     }
 
     private void setState(CharSequence c){
@@ -254,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             dLayout.closeDrawer((GravityCompat.START));
         }
         //si on a un fragment en cours
-        else if(!dernierFragement.isEmpty()){
+        if(!dernierFragement.isEmpty()){
             //on le supprime et on vide la variable et on deselctionne le drawerlayout
             fragmentTransaction.remove(fragmentManager.findFragmentByTag(dernierFragement)).commit();
             dernierFragement="";
@@ -336,20 +335,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void affichagePeripheriques() throws IOException {
-        jimmy = null;
         devices.addAll(pairedDevices);
         devices.addAll(notPairedDevices);
         Toast.makeText(this,"nb devices : " + devices.size(),Toast.LENGTH_SHORT).show();
-       /*
-       //Connexion a Jimmy directe
-        if(!notPairedDevices.isEmpty() && notPairedDevices.size()>0){
-            for(BluetoothDevice d : notPairedDevices){
-                if(d.getAddress()=="98:D3:91:FD:AD:50"){
-                jimmy = d;
-                }
-            }
-        }*/
-
         FragementPeripheriques f = new FragementPeripheriques(devices);
         //lance le fragment des périphériques
         LaunchFragment(f,"FragementPeripheriques");
@@ -444,15 +432,121 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(receiver);
-        if(connexion!=null){
-            connexion.stop();
+    }
+
+    public static class ThreadConnexion extends Thread{
+
+        public ThreadConnexion(BluetoothAdapter a, String adresse){
+            BluetoothDevice robot = a.getRemoteDevice(adresse);
+            BluetoothSocket chaussure = null;
+            UUID uuid = robot.getUuids()[0].getUuid();
+
+            try{
+                chaussure = robot.createInsecureRfcommSocketToServiceRecord(uuid);
+            }
+            catch(IOException e){
+                Log.e("THREADCONNEXION -> CONSTRUCTEUR","CHAUSSETTE NON INITIALISE");
+            }
+            chaussette = chaussure;
+        }
+
+        public void run(){
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            bluetoothAdapter.cancelDiscovery();
+            try{
+                chaussette.connect();
+                Log.e("THREADCONNEXION -> RUN"," : CONNECTED");
+                handler.obtainMessage(STATE_CONNEXION, 1, -1).sendToTarget();
+
+            }
+            catch(IOException e){
+                try{
+                    chaussette.close();
+                    Log.e("THREADCONNEXION -> RUN"," : CAN'T CONNECT");
+                    handler.obtainMessage(STATE_CONNEXION,-1,-1).sendToTarget();
+                }
+                catch (IOException exception){
+                    Log.e("THREADCONNEXION -> RUN"," CHAUSSETTE IMPOSSIBLE A FERMER");
+                }
+                return;
+            }
+
+            thread_connecte = new ThreadConnecte(chaussette);
+            thread_connecte.run();
+        }
+
+        public void cancel(){
+            try{
+                chaussette.close();
+            }
+            catch (IOException e){
+                Log.e("THREADCONNEXION -> CANCEL"," : CHAUSSETTE IMPOSSIBLE A FERMER");
+            }
         }
     }
 
-    public void connexion(String adresse) {
-        connexion.connexion(bluetoothManager.getAdapter().getRemoteDevice(adresse));
-        connexion.write("prout".getBytes());
+    public static class ThreadConnecte extends Thread{
+        private final BluetoothSocket autre_chaussette;
+        private final InputStream flux_entrant;
+        private final OutputStream flux_sortant;
+
+        public ThreadConnecte(BluetoothSocket c){
+            autre_chaussette = c;
+            InputStream i = null;
+            OutputStream o = null;
+
+            try{
+                i = c.getInputStream();
+                o = c.getOutputStream();
+            }
+            catch (IOException e){
+                Log.e("THREADCONNECTE -> CONESTRUCTEUR"," : INPUT OUTPUT IMPOSSIBLE A CHERCHER");
+            }
+            flux_entrant = i;
+            flux_sortant = o;
+        }
+
+        public  void run(){
+            byte[] buffer = new byte[1024];
+            int bytes = 0;
+            while(true){
+                try{
+                    buffer[bytes] = (byte) flux_entrant.read();
+                    String message_recu;
+                    if(buffer[bytes] == '\n'){
+                        message_recu = new String(buffer,0,bytes);
+                        Log.e("THREADCONNECTE -> RUN","READ : "+message_recu);
+                        handler.obtainMessage(STATE_READ,message_recu);
+                        bytes=0;
+                    }
+                    else{
+                        bytes++;
+                    }
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    break;
+                }
+            }
+        }
+
+        public void write(String s){
+            byte[] bytes = s.getBytes();
+            try{
+                flux_sortant.write(bytes);
+            }
+            catch(IOException e){
+                Log.e("THREADCONNECTE -> WRITE","MESSAGE NON ENVOYE : "+s);
+            }
+        }
+
+        public void cancel(){
+            try{
+                autre_chaussette.close();
+            }
+            catch (IOException e){
+                Log.e("THREADCONNECTE -> CANCEL","CHAUSSETTE NON FERMEE");
+            }
+        }
     }
-
-
 }
