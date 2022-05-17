@@ -12,11 +12,7 @@
 /*
    FAIRE UN SYSTEME DE SITRIBUTION DE PAROLE POUR NE PAS ENVOYER PLUSIEURS INTERRUPTIONS A LA FOIS
 */
-
 #include "fonctions_robot.h"
-#include "fonctions_Moteurs.h"
-
-Servo sg, sd;
 
 float c1distance = 100;  //on met par défaut une valeur non critique pour ne pas entrer
 float c2distance = 100;  //dans un if dès la mise en marche du robot
@@ -43,7 +39,7 @@ void setup() {
   pinMode(redresseDPin, OUTPUT);
   pinMode(redresseGPin, OUTPUT);
 
-  //met les pins à HIGH car ils déclenchent interuption à leur passage à LOW
+  //met les pins à HIGH car ils déclenchent interuptions sur la DUE à leur passage à LOW
   digitalWrite(obstaclePin, HIGH);
   digitalWrite(plusDeMurPin, HIGH);
   digitalWrite(redresseDPin, HIGH);
@@ -92,7 +88,7 @@ void loop() {
   }
 
   //si "plus de mur à gauche" alors tourne de 90° à gauche
-  else if (c2distance >= 60 && c3distance >= 60) {
+  else if (c2distance >= 40 && c3distance >= 40) {
     digitalWrite(plusDeMurPin, LOW);
     delay(50);
     digitalWrite(plusDeMurPin, HIGH);
