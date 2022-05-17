@@ -76,13 +76,6 @@ void loop() {
   c3distance = lectureCapteurLateral();
 
   diffLaterale = c2distance - c3distance;
-  /*Serial.println(c1distance);
-    Serial.println(c2distance);
-    Serial.println(c3distance);
-    Serial.println(diffLaterale);
-    Serial.println("");*/
-
-
 
   //evitement d'obstacle PRIORITAIRE
   if (c1distance < 25 && c1distance > 5 ) { //pour eviter les valeurs extremes en cas de non detection de mur
@@ -92,22 +85,11 @@ void loop() {
     //Serial.println("obstacle");
   }
 
-  //si "plus de mur à gauche" alors tourne de 90° à gauche
-  else if (c2distance >= 40 && c3distance >= 40) {
-    digitalWrite(plusDeMurPin, LOW);
-    delay(50);
-    digitalWrite(plusDeMurPin, HIGH);
-    isFinPlusDeMur = false;
-    //Serial.println("plus de mur");
-  }
-
   //pour rester parallèle au mur
-  /*
-    RISQUE DE RALENTIR LE PROGRAMME
-  */
+
   //declenche "redresseGauche" dans le programme de la DUE
   //diffLaterale < 15 pour éviter le cas où un seul capteur voit le mur après interruption "plusDeMur" dans le programme DUE
-  else if ((diffLaterale > 0 && diffLaterale < 5) || c2distance > 25 || c3distance > 25 ) { //si positif, alors robot trop vers la droite
+  else if ((diffLaterale > 0 && diffLaterale < 5) || ((c2distance > 25 || c3distance > 25) && (c2distance < 70 &&  c3distance < 70))) { //si positif, alors robot trop vers la droite
     digitalWrite(redresseGPin, LOW);
     delay(50);
     digitalWrite(redresseGPin, HIGH);
@@ -134,5 +116,15 @@ void loop() {
     }
     //Serial.println("redresse droit");
   }
+
+  //si "plus de mur à gauche" alors tourne de 90° à gauche
+  else if (c2distance >= 40 && c3distance >= 40) {
+    digitalWrite(plusDeMurPin, LOW);
+    delay(50);
+    digitalWrite(plusDeMurPin, HIGH);
+    isFinPlusDeMur = false;
+    //Serial.println("plus de mur");
+  }
+
 
 }//fin loop

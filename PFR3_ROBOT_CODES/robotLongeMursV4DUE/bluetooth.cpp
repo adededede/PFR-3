@@ -1,4 +1,4 @@
-
+/*
 #include "bluetooth.h"
 #include "fonctions_Moteurs.h"
 #include <SoftwareSerial.h>
@@ -47,4 +47,4 @@ void ecouterBluetooth(void) {
     }
 
   }
-}
+}*/

@@ -45,7 +45,7 @@ void redresseGauche(void) {
   isRedresseGauche = true;
 }
 
-void finPlusDeMur(void){
+void finPlusDeMur(void) {
   finDeMur = true;
 }
 void setup()
@@ -100,14 +100,16 @@ void loop() {
   }
 
   else if (isPlusDeMur) {
+    //on enleve interruption plus de mur le temps que le robot reviennent pres du mur
+    //apres avoir tourne a gauche
+    detachInterrupt(digitalPinToInterrupt(3));
     //arret
     arretTotal(sg, sd, 500);
     //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
     tournerGauche(sd, sg);
+    delay(500);
     //on remet le robot droit en marche avant
     avancer(sg, sd, 1580);
-    //delay(2000)
-    detachInterrupt(digitalPinToInterrupt(3));
     //on prépare la prochaine interruption en cas d'abscence de mur
     isPlusDeMur = false;
   }
@@ -128,19 +130,19 @@ void loop() {
     isRedresseGauche = false;
   }
 
-  if(finDeMur){
+  else if (finDeMur) {
     attachInterrupt(digitalPinToInterrupt(3), plusDeMur,  FALLING);
-    finDeMur=false;
+    finDeMur = false;
   }
   /*
      SUPPRIMER LES DELAY POUR QUE L'ENVOI SOIT PRECIS EN PERIODE
   */
-  //envoi de données périodiquement
-  currentTime = millis();
-  if (currentTime - startTime >= period)//si periode écoulee
-  {
+  /*//envoi de données périodiquement
+    currentTime = millis();
+    if (currentTime - startTime >= period)//si periode écoulee
+    {
     //envoi données
     startTime = currentTime;//remise a 0 du timer
-  }
+    }*/
 
 }//fin loop

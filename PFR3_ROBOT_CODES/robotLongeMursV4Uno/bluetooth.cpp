@@ -1,6 +1,5 @@
 
 #include "bluetooth.h"
-#include "fonctions_Moteurs.h"
 #include <SoftwareSerial.h>
 #define BLUETOOTH_RX 12
 #define BLUETOOTH_TX 13
