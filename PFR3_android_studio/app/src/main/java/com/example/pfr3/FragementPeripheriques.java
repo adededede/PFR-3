@@ -44,11 +44,6 @@ public class FragementPeripheriques extends Fragment{
             if(peripheriques!=null && peripheriques.size()>0){
                 for(BluetoothDevice d : peripheriques){
                     adapter.add("Nom : "+d.getName()+"\n@MAC : "+d.getAddress()+"\n");
-                    if(d.getName()!=null){
-                        if(d.getAddress().equals("F8:DF:15:DE:D2:4F")){
-                            text = "Nom : "+d.getName()+"\n@MAC : "+d.getAddress()+"\n";
-                        }
-                    }
                 }
             }
         }
@@ -63,8 +58,9 @@ public class FragementPeripheriques extends Fragment{
                 //on stock l'adress de l'item cliqué
                 MainActivity main = (MainActivity)getActivity();
                 main.connexion(adresse);
+
                 //on reviens à la mainactivity
-                getActivity().getFragmentManager().popBackStack();
+                //getActivity().getFragmentManager().popBackStack();
             }
         });
         return v;

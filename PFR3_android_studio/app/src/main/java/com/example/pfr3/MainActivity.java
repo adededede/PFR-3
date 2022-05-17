@@ -11,8 +11,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import android.Manifest;
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -31,11 +29,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -153,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnGauche = findViewById(R.id.btnGauche);
         btnDroit =  findViewById(R.id.btnDroit);
         bluetoothManager = getSystemService(BluetoothManager.class);
-        connexion = new Connexion(this, handler);
+        connexion = new Connexion(this, handler,getDeviceId(this));
         cartographie = findViewById(R.id.view_cartographie);
 
         //on cache les boutons de commandes
@@ -216,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public static UUID getDeviceId(Context context) {
-        final String tmDevice, tmSerial, androidId;
+        final String tmSerial, androidId;
         //num IMEI de mon tel : 861758043102178
         tmSerial = "861758043102178";
         androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
@@ -455,6 +451,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void connexion(String adresse) {
         connexion.connexion(bluetoothManager.getAdapter().getRemoteDevice(adresse));
+        connexion.write("prout".getBytes());
     }
 
 
