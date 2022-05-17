@@ -2,6 +2,7 @@
 
 #define BLUETOOTH_RX 9
 #define BLUETOOTH_TX 8
+/*
 boolean controleBluetoothActif;
 SoftwareSerial mavoieserie(BLUETOOTH_TX, BLUETOOTH_RX);
 void setup() {
@@ -58,7 +59,7 @@ void loop() {
   }
 
 }
-/*
+*/
   // UTILISER CA
   SoftwareSerial mavoieserie(10, 11); // (TX, RX)
 
@@ -79,4 +80,3 @@ void loop() {
         mavoieserie.write(Serial.read());
     }
   }
-*/
