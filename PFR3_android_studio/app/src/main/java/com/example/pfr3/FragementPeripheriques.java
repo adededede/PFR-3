@@ -53,27 +53,13 @@ public class FragementPeripheriques extends Fragment{
             }
         }
         list.setAdapter(adapter);
-
-        /* LANCEMENT DE LA CONNEXION EN MODE NORMALE
-                NE MARCHE PS ACTUELLEMENT -> le socket se close(), timeout ... => surement à cause de l'uuid
-        String adresse = text.substring(text.length()-18,text.length()-1);*/
-        //on stock l'adress de l'item cliqué
-        MainActivity main = (MainActivity)getActivity();
-        //on reviens à la mainactivity
-        main.connexion("98:D3:91:FD:AD:50");
-        getActivity().getFragmentManager().popBackStack();
-
-
-        //TODO UN PUTAIN DE ONCLICK QUI MARCHE!!!
-        //piste -> à cause du fragment ou du drawer menu??
-        //          => REGARDER SUR ANDAPP GITHUB
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String text = ((TextView) view).getText().toString();
                 String adresse = text.substring(text.length()-18,text.length()-1);
                 //TODO affiche connexion en cours
-                Toast.makeText(getContext(),"clic clic", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(),"connexion vers "+adresse, Toast.LENGTH_SHORT).show();
                 //on stock l'adress de l'item cliqué
                 MainActivity main = (MainActivity)getActivity();
                 main.connexion(adresse);

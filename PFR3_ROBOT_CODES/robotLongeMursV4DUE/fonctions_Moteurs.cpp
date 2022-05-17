@@ -1,11 +1,8 @@
 #include "fonctions_Moteurs.h"
 
-
-
 void StopPaireDeRoue(Servo paireDeRoue) {
   paireDeRoue.writeMicroseconds(1500);
 }
-
 
 void arretTotal(Servo rouesGauches, Servo RouesDroites) {
   StopPaireDeRoue(rouesGauches);
@@ -22,7 +19,7 @@ void arretTotal(Servo rouesGauches, Servo RouesDroites, int delai) {
 void tournerGauche(Servo rouesGauches, Servo rouesDroites) {
   rouesGauches.writeMicroseconds(1500);
   rouesDroites.writeMicroseconds(1700);
-  delay(900);
+  delay(950);
 }
 
 void tournerDroite(Servo rouesDroites, Servo rouesGauches) {

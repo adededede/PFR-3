@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import android.Manifest;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -28,6 +30,8 @@ import android.provider.Settings;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import java.io.IOException;
@@ -37,6 +41,11 @@ import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+    //https://stackoverflow.com/questions/18657427/ioexception-read-failed-socket-might-closed-bluetooth-on-android-4-3
+    //https://github.com/edufolly/flutter_bluetooth_serial/issues/18
+    //https://www.youtube.com/watch?v=TLXpDY1pItQ
+    //https://www.youtube.com/watch?v=Kfe3IYhiKFo
+    //https://www.geeksforgeeks.org/all-about-hc-05-bluetooth-module-connection-with-android/
 
     //variable
     int clicAutomatique,clicManuel = 0;
@@ -62,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final int MESSAGE_STATE_READ = 3;
     public static final int MESSAGE_STATE_WRITE= 4;
     public static final int MESSAGE_DEVICE_NAME = 5;
-    public static  final String DEVICE_NAME = "DEVICE_NAME";
+    public static  final String DEVICE_NAME = "";
     private String connecte_a;
 
     private Handler handler = new Handler(new Handler.Callback() {
@@ -72,16 +81,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 case MESSAGE_STATE_CHANGED:
                     switch (msg.arg1){
                         case Connexion.STATE_NONE:
-                            toast("PAS CONNECTE");
+                            setState("PAS CONNECTE");
+                            Toast.makeText(getApplicationContext(),"PAS CONNECTE",Toast.LENGTH_SHORT).show();
                             break;
                         case Connexion.STATE_CONNECTED:
-                            toast("CONNECTE");
+                            setState("CONNECTE : "+connecte_a);
+                            Toast.makeText(getApplicationContext(),"CONNECTE",Toast.LENGTH_SHORT).show();
                             break;
                         case Connexion.STATE_CONNECTING:
-                            toast("CONNEXION EN COURS");
+                            setState("CONNEXION EN COURS...");
+                            Toast.makeText(getApplicationContext(),"CONNEXION EN COURS",Toast.LENGTH_SHORT).show();
                             break;
                         case Connexion.STATE_LISTEN:
-                            toast("PAS CONNECTE");
+                            setState("PAS CONNECTE, LISTEN");
+                            Toast.makeText(getApplicationContext(),"PAS CONNECTE, LISTEN",Toast.LENGTH_SHORT).show();
                             break;
                     }
                     break;
@@ -97,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     break;
                 case MESSAGE_DEVICE_NAME:
                     connecte_a = msg.getData().getString(DEVICE_NAME);
+                    Toast.makeText(getApplicationContext(),"DEVICE : "+connecte_a,Toast.LENGTH_SHORT).show();
                     break;
             }
             return false;
@@ -151,6 +165,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //met la nView au front
         nView.bringToFront();
 
+        //initialisation d'écouteur pour les boutons
+        btnDroit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //on envoie à l'appareil bluetooth le signal pour aller à droite
+
+            }
+        });
+        btnGauche.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //on envoie à l'appareil bluetooth le signal pour aller à gauche
+
+            }
+        });
+        btnHaut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //on envoie à l'appareil bluetooth le signal pour aller tout droit
+
+            }
+        });
+        btnBas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //on envoie à l'appareil bluetooth le signal pour aller en arrière
+
+            }
+        });
+
         //initialisation d'un écouteur pour le dLayout
         ActionBarDrawerToggle toggle= new ActionBarDrawerToggle(this, dLayout,tBar,R.string.navigation_drawer_open,R.string.navigation_drawer_close);
         dLayout.addDrawerListener(toggle);
@@ -167,13 +211,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         registerReceiver(receiver, intentFilter);
     }
 
-    public static UUID getDeviceID(Context context) {
+    private void setState(CharSequence c){
+        Toast.makeText(this,c,Toast.LENGTH_SHORT).show();
+    }
+
+    public static UUID getDeviceId(Context context) {
         final String tmDevice, tmSerial, androidId;
-        tmDevice = Settings.Secure.getString(context.getContentResolver(),Settings.Secure.ANDROID_ID);
-        //num IMEI de mon tel : 861758042792177 ou 861758043102178
+        //num IMEI de mon tel : 861758043102178
         tmSerial = "861758043102178";
         androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        UUID deviceUuid = new UUID(androidId.hashCode(),  tmSerial.hashCode());
         return deviceUuid;
     }
 
@@ -215,6 +262,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //on le supprime et on vide la variable et on deselctionne le drawerlayout
             fragmentTransaction.remove(fragmentManager.findFragmentByTag(dernierFragement)).commit();
             dernierFragement="";
+            LinearLayout layout_main = findViewById(R.id.layout_lineaire_main);
+            layout_main.setVisibility(View.VISIBLE);
             dLayout.setSelected(false);
         }
         else{
@@ -244,7 +293,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             //mode automatique
             case R.id.navigation_toolbar_automatique:
-                connexion.write("prout".getBytes());
+                //connexion.connexion(bluetoothManager.getAdapter().getRemoteDevice("98:D3:91:FD:AD:50"));
+                //connexion.write("prout".getBytes());
                 item.setChecked(false);
                 if(clicAutomatique%2 == 1){
                     item.setIcon(R.mipmap.ic_mode_on);
@@ -310,20 +360,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void LaunchFragment(Fragment frag, String tag){
+        LinearLayout layout_main = findViewById(R.id.layout_lineaire_main);
+        layout_main.setVisibility(View.GONE);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        //set the transition
+        //selection de la transition voulu
         fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        //if the container of the fragment is not empty
+        //si le container du fragemnt n'est pas vide
         if(!fragmentTransaction.isEmpty()){
-            //we suppress the last fragment
+            //onsupprime le dernier fragment
             fragmentTransaction.remove(fragmentManager.findFragmentByTag(dernierFragement)).commit();
         }
-        //we add a fragment to the container
+        //on ajoute le fragement au container voulu
         fragmentTransaction.add(R.id.fragment_container,frag,tag);
-        //then we commit
+        //on commit
         fragmentTransaction.commit();
-        //we update lastFragment
+        //MAJ du dernier fragment
         dernierFragement = tag;
     }
 
@@ -399,10 +451,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(connexion!=null){
             connexion.stop();
         }
-    }
-
-    public void toast(String s){
-        Toast.makeText(this, s,Toast.LENGTH_SHORT).show();
     }
 
     public void connexion(String adresse) {

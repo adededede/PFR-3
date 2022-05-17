@@ -5,8 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.graphics.BlendMode;
-import android.nfc.cardemulation.HostNfcFService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,17 +18,16 @@ import java.util.UUID;
 
 public class Connexion {
     private final Handler h;
+    private final UUID APP_UUID;
     private Context c;
 
     public static final int STATE_NONE = 0;
     public static  final int STATE_LISTEN = 1;
     public static  final int STATE_CONNECTING = 2;
     public static  final int STATE_CONNECTED = 3;
-    //private final UUID APP_UUID = UUID.fromString("3657c53d6cadba5f");
-    private final UUID APP_UUID;
     private ThreadConnexion connexion;
     private ThreadAccepter accepter;
-    private ThreadConnecte connecte;
+    //private ThreadConnecte connecte;
     private int state;
     private BluetoothAdapter bluetoothAdapter;
 
@@ -38,9 +35,9 @@ public class Connexion {
         this.h = handler;
         this.c=context;
 
-        APP_UUID = MainActivity.getDeviceID(c.getApplicationContext());
         state = STATE_NONE;
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        APP_UUID = MainActivity.getDeviceId(c);
     }
 
     public  int getState(){
@@ -49,23 +46,24 @@ public class Connexion {
 
     public synchronized void setState(int state){
         this.state = state;
+        //envoie le changement d'état à notre handler
         this.h.obtainMessage(MainActivity.MESSAGE_STATE_CHANGED,state,-1).sendToTarget();
     }
 
     private synchronized void start(){
+        //permet de s'assurer que l'on part sur de nouvelles bases
         if(connexion!=null){
             connexion.cancel();
             connexion=null;
         }
-        if(accepter == null){
+       if(accepter == null){
             accepter = new ThreadAccepter();
             accepter.start();
         }
-
-        if(connecte != null){
+        /*if(connecte != null){
             connecte.cancel();
             connecte = null;
-        }
+        }*/
 
         setState(STATE_LISTEN);
     }
@@ -79,11 +77,11 @@ public class Connexion {
             accepter.cancel();
             accepter=null;
         }
-
+/*
         if(connecte != null){
             connecte.cancel();
             connecte = null;
-        }
+        }*/
 
         setState(STATE_NONE);
     }
@@ -95,14 +93,14 @@ public class Connexion {
         }
         connexion = new ThreadConnexion(device);
         connexion.start();
-        if(connecte != null){
+        /*if(connecte != null){
             connecte.cancel();
             connecte = null;
-        }
+        }*/
         setState(STATE_CONNECTING);
     }
 
-    public void write(byte[] buffer){
+   /* public void write(byte[] buffer){
         ThreadConnecte c;
         synchronized (this){
             if(state != STATE_CONNECTED){
@@ -111,7 +109,7 @@ public class Connexion {
             c = connecte;
         }
         c.write(buffer);
-    }
+    }*/
 
     private class ThreadAccepter extends Thread{
         private BluetoothServerSocket chaussette_serveuse;
@@ -141,7 +139,7 @@ public class Connexion {
                     Log.e("Accepter -> Run -> Close",e.toString());
                 }
             }
-            if(chaussette_serveuse!=null){
+            if(chaussette!=null){
                 switch (state){
                     case STATE_LISTEN:
                     case STATE_CONNECTING:
@@ -179,12 +177,14 @@ public class Connexion {
 
             BluetoothSocket chaussure = null;
             try{
-                chaussure = device.createRfcommSocketToServiceRecord(APP_UUID);
+                //difference entre insecure et secure??
+                chaussure =  d.createInsecureRfcommSocketToServiceRecord(APP_UUID);
             }
             catch(IOException e){
                 Log.e("Connect -> Constructeur",e.toString());
             }
             chaussette=chaussure;
+            Toast.makeText(c, chaussette.toString(), Toast.LENGTH_SHORT).show();
         }
 
         public void run(){
@@ -205,7 +205,6 @@ public class Connexion {
             synchronized (Connexion.this){
                 connexion = null;
             }
-
             connexion(device);
         }
 
@@ -227,15 +226,15 @@ public class Connexion {
                 connexion.cancel();
                 connexion = null;
             }
-            if(connecte != null){
+            /*if(connecte != null){
                 connecte.cancel();
                 connecte = null;
             }
             connecte = new ThreadConnecte(chaussette);
-            connecte.start();
+            connecte.start();*/
             Message message = h.obtainMessage(MainActivity.MESSAGE_DEVICE_NAME);
             Bundle bundle = new Bundle();
-            bundle.putString(MainActivity.DEVICE_NAME,d.getName());
+            bundle.putString(MainActivity.DEVICE_NAME,d.getAddress());
             message.setData(bundle);
             h.sendMessage(message);
 
@@ -243,7 +242,7 @@ public class Connexion {
         }
     }
 
-    private class ThreadConnecte extends Thread{
+   /* private class ThreadConnecte extends Thread{
         private final BluetoothSocket chaussette;
         private  final InputStream flux_entrant;
         private  final  OutputStream flux_sortant;
@@ -295,6 +294,6 @@ public class Connexion {
                 Log.e("Connected -> Cancel",e.toString());
             }
         }
-    }
+    }*/
 }
 
