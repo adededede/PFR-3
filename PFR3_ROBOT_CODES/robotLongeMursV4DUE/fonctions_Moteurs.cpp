@@ -1,11 +1,8 @@
 #include "fonctions_Moteurs.h"
 
-
-
 void StopPaireDeRoue(Servo paireDeRoue) {
   paireDeRoue.writeMicroseconds(1500);
 }
-
 
 void arretTotal(Servo rouesGauches, Servo RouesDroites) {
   StopPaireDeRoue(rouesGauches);
