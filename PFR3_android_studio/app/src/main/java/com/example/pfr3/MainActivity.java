@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     case STATE_CONNEXION:
                         switch (message.arg1){
                             case 1:
+                                Toast.makeText(getApplicationContext(),"CONNECTE ",Toast.LENGTH_SHORT).show();
                                 //Connecté à
                                 break;
                             case -1:
@@ -131,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
                     case STATE_READ:
                         String recu = message.obj.toString();
+                        Toast.makeText(getApplicationContext(),"RECU : "+recu,Toast.LENGTH_SHORT).show();
                         switch (recu.toLowerCase()){
                             //case on recoit une vitesse:
                             //  on fait ça
@@ -155,28 +157,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller à droite
-
+                if(thread_connecte!=null){
+                    Toast.makeText(getApplicationContext(),"DROITE",Toast.LENGTH_SHORT).show();
+                    thread_connecte.write("DROITE");
+                }
             }
         });
         btnGauche.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller à gauche
-
+                if(thread_connecte!=null){
+                    Toast.makeText(getApplicationContext(),"GAUCHE",Toast.LENGTH_SHORT).show();
+                    thread_connecte.write("GAUCHE");
+                }
             }
         });
         btnHaut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller tout droit
-
+                if(thread_connecte!=null){
+                    Toast.makeText(getApplicationContext(),"DEVANT",Toast.LENGTH_SHORT).show();
+                    thread_connecte.write("DEVANT");
+                }
             }
         });
         btnBas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller en arrière
-
+                if(thread_connecte!=null){
+                    Toast.makeText(getApplicationContext(),"DERRIERE",Toast.LENGTH_SHORT).show();
+                    thread_connecte.write("DERRIERE");
+                }
             }
         });
 
