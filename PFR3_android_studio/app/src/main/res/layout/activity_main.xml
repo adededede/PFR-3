@@ -65,18 +65,78 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="60dp"
             android:fontFamily="@font/alegreya_sc_bold"
-            android:text="Jimmy"
+            android:text="Gestion d'un robot"
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="30sp" />
 
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_etat"
+            android:layout_marginTop="15dp"
+            android:textAlignment="textStart"
+            android:text="Etat de l'appareil connecté : "
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/alegreya_sc"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_nom"
+            android:layout_marginTop="10dp"
+            android:textAlignment="textStart"
+            android:text="Nom : "
+            android:layout_marginLeft="25dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/alegreya_sc"
+            android:textSize="15sp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_vitesse"
+            android:layout_marginTop="10dp"
+            android:textAlignment="textStart"
+            android:text="Vitesse : "
+            android:layout_marginLeft="25dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/alegreya_sc"
+            android:textSize="15sp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_distance"
+            android:layout_marginTop="10dp"
+            android:textAlignment="textStart"
+            android:text="Distance parcouru : "
+            android:layout_marginLeft="25dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/alegreya_sc"
+            android:textSize="15sp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_position"
+            android:layout_marginTop="10dp"
+            android:textAlignment="textStart"
+            android:text="Position : "
+            android:layout_marginLeft="25dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/alegreya_sc"
+            android:textSize="15sp"/>
+
+        <TextView
             android:id="@+id/textCartographie"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="170dp"
+            android:layout_marginTop="25dp"
             android:fontFamily="@font/alegreya_sc"
-            android:text="Cartographie de Jimmy"
+            android:text="Cartographie du robot"
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="15sp" />
@@ -88,11 +148,51 @@
             android:layout_marginStart="30dp"
             android:layout_marginTop="10dp" />
 
+        <ProgressBar
+            android:id="@+id/progressBar_navigation"
+            android:layout_width="287dp"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp" />
+
+        <TableRow
+            android:id="@+id/catographie_btn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnRecommencer"
+                android:layout_width="61dp"
+                android:layout_height="54dp"
+                android:layout_gravity="center"
+                android:background="@mipmap/ic_recommencer" />
+
+            <Button
+                android:id="@+id/btnCommencer"
+                android:layout_width="61dp"
+                android:layout_height="54dp"
+                android:layout_gravity="center"
+                android:background="@mipmap/ic_commencer" />
+
+            <Button
+                android:id="@+id/btnStop"
+                android:layout_width="61dp"
+                android:layout_height="54dp"
+                android:layout_gravity="center"
+                android:background="@mipmap/ic_stop" />
+
+
+        </TableRow>
+
+
         <Button
             android:id="@+id/btnHaut"
             android:layout_width="61dp"
             android:layout_height="54dp"
-            android:layout_marginTop="90dp"
+            android:layout_marginTop="20dp"
             android:layout_gravity="center"
             android:background="@mipmap/ic_up_arrow" />
 

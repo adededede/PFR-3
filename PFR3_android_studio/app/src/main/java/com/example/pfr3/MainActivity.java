@@ -32,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //https://www.geeksforgeeks.org/all-about-hc-05-bluetooth-module-connection-with-android/
 
     //variable
-    int clicAutomatique,clicManuel = 0;
+    int clicAutomatique,clicManuel,clicCommencer = 0;
 
     //Données qu'on prend du design
     View cartographie;
@@ -57,7 +58,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView nView;
     androidx.appcompat.widget.Toolbar tBar;
     String dernierFragement;
-    Button btnGauche,btnDroit, btnBas, btnHaut;
+    TextView texte_nom,texte_vitesse,texte_position,texte_distance;
+    Button btnGauche,btnDroit, btnBas, btnHaut,btnCommencer,btnRecommencer,btnArreter;
 
     //donnees bluetooth
     BluetoothManager bluetoothManager;
@@ -108,10 +110,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dLayout = findViewById(R.id.drawer_layout);
         nView = findViewById(R.id.navigation_view);
         tBar = findViewById(R.id.toolbar);
+        texte_distance  = findViewById(R.id.text_distance);
+        texte_position  = findViewById(R.id.text_position);
+        texte_vitesse  = findViewById(R.id.text_vitesse);
+        texte_nom  = findViewById(R.id.text_nom);
         btnBas = findViewById(R.id.btnBas);
         btnHaut = findViewById(R.id.btnHaut);
         btnGauche = findViewById(R.id.btnGauche);
         btnDroit =  findViewById(R.id.btnDroit);
+        btnRecommencer = findViewById(R.id.btnRecommencer);
+        btnCommencer = findViewById(R.id.btnCommencer);
+        btnArreter = findViewById(R.id.btnStop);
         bluetoothManager = getSystemService(BluetoothManager.class);
         //connexion = new Connexion(this, handler,getDeviceId(this));
         cartographie = findViewById(R.id.view_cartographie);
@@ -124,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             case 1:
                                 Toast.makeText(getApplicationContext(),"CONNECTE ",Toast.LENGTH_SHORT).show();
                                 //Connecté à
+                                texte_nom.setText(connecte_a);
                                 break;
                             case -1:
                                 //echec de la connexion
@@ -148,18 +158,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnGauche.setVisibility(View.GONE);
         btnHaut.setVisibility(View.GONE);
         btnBas.setVisibility(View.GONE);
+        btnArreter.setVisibility(View.GONE);
+        btnRecommencer.setVisibility(View.GONE);
 
         //met la nView au front
         nView.bringToFront();
 
         //initialisation d'écouteur pour les boutons
+        btnCommencer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(clicCommencer%2==1){
+                    btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
+                    btnArreter.setVisibility(View.GONE);
+                    btnRecommencer.setVisibility(View.GONE);
+                }
+                else{
+                    btnCommencer.setBackgroundResource(R.mipmap.ic_pause);
+                    btnArreter.setVisibility(View.VISIBLE);
+                    btnRecommencer.setVisibility(View.VISIBLE);
+                }
+                clicCommencer++;
+            }
+        });
+        btnRecommencer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
+                clicCommencer=0;
+            }
+        });
+        btnArreter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
+                clicCommencer=0;
+            }
+        });
         btnDroit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller à droite
                 if(thread_connecte!=null){
                     Toast.makeText(getApplicationContext(),"DROITE",Toast.LENGTH_SHORT).show();
-                    thread_connecte.write("DROITE");
+                    thread_connecte.write("DROITE\n");
                 }
             }
         });
@@ -169,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //on envoie à l'appareil bluetooth le signal pour aller à gauche
                 if(thread_connecte!=null){
                     Toast.makeText(getApplicationContext(),"GAUCHE",Toast.LENGTH_SHORT).show();
-                    thread_connecte.write("GAUCHE");
+                    thread_connecte.write("GAUCHE\n");
                 }
             }
         });
@@ -179,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //on envoie à l'appareil bluetooth le signal pour aller tout droit
                 if(thread_connecte!=null){
                     Toast.makeText(getApplicationContext(),"DEVANT",Toast.LENGTH_SHORT).show();
-                    thread_connecte.write("DEVANT");
+                    thread_connecte.write("AVANT\n");
                 }
             }
         });
@@ -189,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //on envoie à l'appareil bluetooth le signal pour aller en arrière
                 if(thread_connecte!=null){
                     Toast.makeText(getApplicationContext(),"DERRIERE",Toast.LENGTH_SHORT).show();
-                    thread_connecte.write("DERRIERE");
+                    thread_connecte.write("ARRIERE\n");
                 }
             }
         });
@@ -288,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.navigation_toolbar_activer:
                 item.setChecked(false);
                 if(!bluetoothManager.getAdapter().isEnabled()){
-                    item.setIcon(R.mipmap.ic_check);
+                    item.setIcon(R.mipmap.ic_mode_on);
                 }
                 else{
                     item.setIcon(null);
@@ -527,7 +569,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 try{
                     buffer[bytes] = (byte) flux_entrant.read();
                     String message_recu;
-                    if(buffer[bytes] == '\n'){
+                    if(buffer[bytes] == '\0'){
                         message_recu = new String(buffer,0,bytes);
                         Log.e("THREADCONNECTE -> RUN","READ : "+message_recu);
                         handler.obtainMessage(STATE_READ,message_recu);
