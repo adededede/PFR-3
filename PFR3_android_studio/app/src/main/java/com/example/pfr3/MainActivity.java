@@ -20,6 +20,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.RenderEffect;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,6 +39,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,13 +60,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     //variable
     int clicAutomatique,clicManuel,clicCommencer = 0;
+    String dernierFragement;
 
     //Données qu'on prend du design
-    View cartographie;
+    ImageView cartographie;
     DrawerLayout dLayout;
     NavigationView nView;
     androidx.appcompat.widget.Toolbar tBar;
-    String dernierFragement;
     TextView texte_nom,texte_vitesse,texte_position,texte_distance;
     Button btnGauche,btnDroit, btnBas, btnHaut,btnCommencer,btnRecommencer,btnArreter;
 
@@ -122,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnCommencer = findViewById(R.id.btnCommencer);
         btnArreter = findViewById(R.id.btnStop);
         bluetoothManager = getSystemService(BluetoothManager.class);
-        //connexion = new Connexion(this, handler,getDeviceId(this));
         cartographie = findViewById(R.id.view_cartographie);
         handler = new Handler(Looper.getMainLooper()){
             @Override
@@ -133,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             case 1:
                                 Toast.makeText(getApplicationContext(),"CONNECTE ",Toast.LENGTH_SHORT).show();
                                 //Connecté à
-                                texte_nom.setText(connecte_a);
+                                texte_nom.setText("Nom : "+connecte_a);
                                 break;
                             case -1:
                                 //echec de la connexion
@@ -241,6 +249,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dLayout.addDrawerListener(toggle);
         toggle.syncState();
 
+        //On dessine le rectangle de contour
+
         //add an event listener to design items
         nView.setNavigationItemSelectedListener(this);
 
@@ -274,6 +284,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         UUID deviceUuid = new UUID(androidId.hashCode(),  tmSerial.hashCode());
         return deviceUuid;
     }
+
 
     private void connexionBluetooth(){;
         if(bluetoothManager.getAdapter() == null){
@@ -417,6 +428,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentTransaction.commit();
         //MAJ du dernier fragment
         dernierFragement = tag;
+    }
+
+    private void dessiner(){
+        //DESSINER SUR IMAGE
     }
 
     private void affichagePeripherique() {

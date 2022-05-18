@@ -141,12 +141,13 @@
             android:textColor="@color/black"
             android:textSize="15sp" />
 
-        <View
+        <ImageView
             android:id="@+id/view_cartographie"
             android:layout_width="346dp"
             android:layout_height="207dp"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="10dp" />
+            android:layout_marginTop="10dp"
+            app:srcCompat="@color/white" />
 
         <ProgressBar
             android:id="@+id/progressBar_navigation"
