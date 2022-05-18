@@ -5,7 +5,7 @@
 /* PLACER LE ROBOT PRET D'UN MUR A LA GAUCHE DU ROBOT            */
 /*---------------------------------------------------------------*/
 
-/*ROLE DE LA CART UNO : MESURER CONTINUELLEMENT VIA LES 3 CAPTEURS
+/*ROLE DE LA CARTE UNO : MESURER CONTINUELLEMENT VIA LES 3 CAPTEURS
    ET NE COMMUNIQUER AVEC LA CARTE DUE QUE QUAND UNE DISTANCE
    CRITIQUE EST MESUREE
 */
@@ -86,7 +86,8 @@ void loop() {
   diffLaterale = c2distance - c3distance;
 
   //evitement d'obstacle PRIORITAIRE
-  if (c1distance < 25 && c1distance > 5 ) { //pour eviter les valeurs extremes en cas de non detection de mur
+  if (c1distance < 25 && c1distance > 10 ) { //pour eviter les valeurs extremes en cas de non detection de mur
+    Serial.println("obstacle");
     digitalWrite(obstaclePin, LOW);//déclenche une interruption sur le programme principal de la DUE
     delay(50);
     digitalWrite(obstaclePin, HIGH);//prépare le prochain passage à HIGH

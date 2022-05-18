@@ -29,6 +29,6 @@ void tournerDroite(Servo rouesDroites, Servo rouesGauches) {
 }
 
 void avancer(Servo rouesDroites, Servo rouesGauches, int millisecondes) {
-  rouesDroites.writeMicroseconds(millisecondes);
+  rouesDroites.writeMicroseconds(millisecondes);//1580
   rouesGauches.writeMicroseconds(millisecondes);
 }

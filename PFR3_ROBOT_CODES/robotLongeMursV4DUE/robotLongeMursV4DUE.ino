@@ -26,30 +26,15 @@ unsigned long startTime;
 unsigned long currentTime;
 const unsigned long period = 1000;
 
-//ISR
-void evitementObstacle(void) {
-  isEvitementObstacle = true;
-}
-void plusDeMur(void) {
-  isPlusDeMur = true;
-}
-void redresseDroit(void) {
-  isRedresseDroit = true;
-}
-void redresseGauche(void) {
-  isRedresseGauche = true;
-}
-void finPlusDeMur(void) {
-  finDeMur = true;
-}
 void setup()
 {
+  noInterrupts();
   //initialise le timer
   startTime = millis();
 
   //initialisation de la communication avec le moniteur série
   Serial.begin(9600);
-
+  Serial.println("setup");
   //pin utilisee pour le bip
   pinMode(bipPin, OUTPUT);
   //déclaration des pins qui lisent les déclenchement d'interruptions
@@ -74,13 +59,14 @@ void setup()
 
   //servo.attach() positionne moteurs à la derniere valeur utilisee via servo.write();
   sg.write(1500);//positionne les roues à l'arret
-  sd.write(1500);
+  sd.write(1500);//1000 2000 1500
   sg.attach(9);//  paire droite (CH2)
   sd.attach(10); // paire gauche (CH1)(oui il y a inversion)
 
   //on fait avancer le robot tout droit
-  avancer(sd, sg, 1580);
+  avancer(sd, sg, 1600);
 
+  interrupts();
 }//fin setup
 
 void loop() {
@@ -97,13 +83,13 @@ void loop() {
   }
 
   else if (isPlusDeMur) {
-    //on enleve interruption plus de mur le temps que le robot reviennent pres du mur
-    //apres avoir tourne a gauche
-    detachInterrupt(digitalPinToInterrupt(3));
     //arret
     arretTotal(sg, sd, 500);
     //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
     tournerGauche(sd, sg);
+    //on enleve interruption plus de mur le temps que le robot reviennent pres du mur
+    //apres avoir tourne a gauche
+    detachInterrupt(digitalPinToInterrupt(3));
     //previent la UNO qu'il doit scruter la fin de plus de mur
     digitalWrite(13, LOW);
     delay(50);
@@ -134,7 +120,7 @@ void loop() {
   else if (finDeMur) {
     attachInterrupt(digitalPinToInterrupt(3), plusDeMur,  FALLING);
     finDeMur = false;
-    }
+  }
   /*
      SUPPRIMER LES DELAY POUR QUE L'ENVOI SOIT PRECIS EN PERIODE
   */
@@ -146,4 +132,22 @@ void loop() {
     startTime = currentTime;//remise a 0 du timer
     }*/
 
-}//fin loop
+}
+/*//fin loop*/
+
+//ISR
+void evitementObstacle(void) {
+  isEvitementObstacle = true;
+}
+void plusDeMur(void) {
+  isPlusDeMur = true;
+}
+void redresseDroit(void) {
+  isRedresseDroit = true;
+}
+void redresseGauche(void) {
+  isRedresseGauche = true;
+}
+void finPlusDeMur(void) {
+  finDeMur = true;
+}
