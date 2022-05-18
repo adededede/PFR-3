@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //on envoie à l'appareil bluetooth le signal pour aller à droite
                 if(thread_connecte!=null){
                     Toast.makeText(getApplicationContext(),"DROITE",Toast.LENGTH_SHORT).show();
-                    thread_connecte.write("DROITE\n");
+                    thread_connecte.write('d');
                 }
             }
         });
@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //on envoie à l'appareil bluetooth le signal pour aller à gauche
                 if(thread_connecte!=null){
                     Toast.makeText(getApplicationContext(),"GAUCHE",Toast.LENGTH_SHORT).show();
-                    thread_connecte.write("GAUCHE\n");
+                    thread_connecte.write('q');
                 }
             }
         });
@@ -228,8 +228,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller tout droit
                 if(thread_connecte!=null){
-                    Toast.makeText(getApplicationContext(),"DEVANT",Toast.LENGTH_SHORT).show();
-                    thread_connecte.write("AVANT\n");
+                    Toast.makeText(getApplicationContext(),"AVANT",Toast.LENGTH_SHORT).show();
+                    thread_connecte.write('z');
                 }
             }
         });
@@ -238,8 +238,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller en arrière
                 if(thread_connecte!=null){
-                    Toast.makeText(getApplicationContext(),"DERRIERE",Toast.LENGTH_SHORT).show();
-                    thread_connecte.write("ARRIERE\n");
+                    Toast.makeText(getApplicationContext(),"ARRIERE",Toast.LENGTH_SHORT).show();
+                    thread_connecte.write('s');
                 }
             }
         });
@@ -364,6 +364,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     this.btnHaut.setVisibility(View.VISIBLE);
                     this.btnGauche.setVisibility(View.VISIBLE);
                     this.btnDroit.setVisibility(View.VISIBLE);
+                    //modre automatique
+                    if(thread_connecte!=null){
+                        Toast.makeText(getApplicationContext(),"c",Toast.LENGTH_SHORT).show();
+                        thread_connecte.write('c');
+                    }
                 }
                 else{
                     //remettre l'icon du mode manuel en on
@@ -372,6 +377,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     this.btnHaut.setVisibility(View.GONE);
                     this.btnGauche.setVisibility(View.GONE);
                     this.btnDroit.setVisibility(View.GONE);
+                    //modre manuel
+                    if(thread_connecte!=null){
+                        Toast.makeText(getApplicationContext(),"m",Toast.LENGTH_SHORT).show();
+                        thread_connecte.write('m');
+                    }
                 }
                 clicAutomatique++;
                 break;
@@ -385,6 +395,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     this.btnHaut.setVisibility(View.GONE);
                     this.btnGauche.setVisibility(View.GONE);
                     this.btnDroit.setVisibility(View.GONE);
+                    //modre automatique
+                    if(thread_connecte!=null){
+                        Toast.makeText(getApplicationContext(),"c",Toast.LENGTH_SHORT).show();
+                        thread_connecte.write('c');
+                    }
                 }
                 else{
                     item.setIcon(R.mipmap.ic_mode_on);
@@ -392,6 +407,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     this.btnHaut.setVisibility(View.VISIBLE);
                     this.btnGauche.setVisibility(View.VISIBLE);
                     this.btnDroit.setVisibility(View.VISIBLE);
+                    //modre manuel
+                    if(thread_connecte!=null){
+                        Toast.makeText(getApplicationContext(),"m",Toast.LENGTH_SHORT).show();
+                        thread_connecte.write('m');
+                    }
                 }
                 clicManuel++;
                 break;
@@ -608,6 +628,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             catch(IOException e){
                 Log.e("THREADCONNECTE -> WRITE","MESSAGE NON ENVOYE : "+s);
+            }
+        }
+
+        public void write(char c){
+            byte bytes = (byte)c;
+            try{
+                flux_sortant.write(bytes);
+            }
+            catch(IOException e){
+                Log.e("THREADCONNECTE -> WRITE","MESSAGE NON ENVOYE : "+c);
             }
         }
 

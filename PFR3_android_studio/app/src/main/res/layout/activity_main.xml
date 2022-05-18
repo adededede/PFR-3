@@ -145,7 +145,7 @@
             android:id="@+id/view_cartographie"
             android:layout_width="346dp"
             android:layout_height="207dp"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="35dp"
             android:layout_marginTop="10dp"
             app:srcCompat="@color/white" />
 
