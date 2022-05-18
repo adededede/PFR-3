@@ -18,13 +18,17 @@ float c1distance = 100;  //on met par défaut une valeur non critique pour ne pa
 float c2distance = 100;  //dans un if dès la mise en marche du robot
 float c3distance = 30;
 int diffLaterale = 0;
-bool isFinPlusDeMur = true;
+volatile bool listenFinPlusDeMur = false;
 
 const int obstaclePin = 9;
 const int plusDeMurPin = 10;
 const int redresseDPin = 11;
 const int redresseGPin = 12;
 const int finPlusDeMurPin = 13;
+
+void listenFinPlusDeMurISR(void) {
+  listenFinPlusDeMur = true;
+}
 
 void setup() {
   Serial.begin(9600);
@@ -41,6 +45,7 @@ void setup() {
   pinMode(redresseDPin, OUTPUT);
   pinMode(redresseGPin, OUTPUT);
   pinMode(finPlusDeMurPin, OUTPUT);
+  pinMode(2, INPUT_PULLUP);
 
 
   //met les pins à HIGH car ils déclenchent interuptions sur la DUE à leur passage à LOW
@@ -49,6 +54,9 @@ void setup() {
   digitalWrite(redresseDPin, HIGH);
   digitalWrite(redresseGPin, HIGH);
   digitalWrite(finPlusDeMurPin, HIGH);
+
+  //declaration interuption
+  attachInterrupt(digitalPinToInterrupt(2), listenFinPlusDeMurISR, FALLING);
 
   /*
     //calcul temps de mesure capteurs (SANS CAPTEURS)
@@ -84,47 +92,35 @@ void loop() {
     digitalWrite(obstaclePin, HIGH);//prépare le prochain passage à HIGH
     //Serial.println("obstacle");
   }
-
-  //pour rester parallèle au mur
-
+  else if ((c1distance < 50 && c2distance < 50) && listenFinPlusDeMur) {
+    digitalWrite(finPlusDeMurPin, LOW);
+    delay(50);
+    digitalWrite(finPlusDeMurPin, HIGH);
+    listenFinPlusDeMur = false;
+  }
   //declenche "redresseGauche" dans le programme de la DUE
   //diffLaterale < 15 pour éviter le cas où un seul capteur voit le mur après interruption "plusDeMur" dans le programme DUE
   else if ((diffLaterale > 0 && diffLaterale < 5) || ((c2distance > 25 || c3distance > 25) && (c2distance < 70 &&  c3distance < 70))) { //si positif, alors robot trop vers la droite
     digitalWrite(redresseGPin, LOW);
     delay(50);
     digitalWrite(redresseGPin, HIGH);
-    if (!isFinPlusDeMur) {
-      digitalWrite(finPlusDeMurPin, LOW);
-      delay(50);
-      digitalWrite(finPlusDeMurPin, HIGH);
-      isFinPlusDeMur = true;
-    }
     //Serial.println("redresse gauche");
   }
 
   //declenche "redresseDroit" dans le programme de la DUE
   //diffLaterale < 15 pour la même raison
-  else if ((diffLaterale < 0 && diffLaterale < 5) || c2distance < 15 || c3distance < 15) { //si négatif, alors robot trop vers la gauche
+  else if ((diffLaterale < 0 && diffLaterale < 5) || ((c2distance < 15 || c3distance < 15) && (c2distance < 70 &&  c3distance < 70))) { //si négatif, alors robot trop vers la gauche
     digitalWrite(redresseDPin, LOW);
     delay(50);
     digitalWrite(redresseDPin, HIGH);
-    if (!isFinPlusDeMur) {
-      digitalWrite(finPlusDeMurPin, LOW);
-      delay(50);
-      digitalWrite(finPlusDeMurPin, HIGH);
-      isFinPlusDeMur = true;
-    }
     //Serial.println("redresse droit");
   }
 
   //si "plus de mur à gauche" alors tourne de 90° à gauche
-  else if (c2distance >= 40 && c3distance >= 40) {
+  else if ((c2distance >= 40 && c3distance >= 40) && !listenFinPlusDeMur) {
     digitalWrite(plusDeMurPin, LOW);
     delay(50);
     digitalWrite(plusDeMurPin, HIGH);
-    isFinPlusDeMur = false;
     //Serial.println("plus de mur");
   }
-
-
 }//fin loop
