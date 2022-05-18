@@ -35,6 +35,13 @@ void setup()
   //initialisation de la communication avec le moniteur série
   Serial.begin(9600);
   Serial.println("setup");
+
+  // init bluetooth
+ initBluetooth();
+
+  // init encodeur
+
+  initEncodeurs() ;
   //pin utilisee pour le bip
   pinMode(bipPin, OUTPUT);
   //déclaration des pins qui lisent les déclenchement d'interruptions

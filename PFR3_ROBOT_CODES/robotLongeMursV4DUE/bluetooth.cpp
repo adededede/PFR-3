@@ -1,50 +1,69 @@
-/*
+
 #include "bluetooth.h"
-#include "fonctions_Moteurs.h"
-#include <SoftwareSerial.h>
-#define BLUETOOTH_RX 12
-#define BLUETOOTH_TX 13
-boolean controleBluetoothActif;
-SoftwareSerial mavoieserie(BLUETOOTH_TX, BLUETOOTH_RX);
+char commande; // manuel "m" , cartographie "c"
+boolean controleBluetoothActif = false;
 void initBluetooth(void) {
   // Ouvre la voie série avec le module BT
-  mavoieserie.begin(9600);
+  Serial1.begin(9600);//19 RX, 18 TX
+  Serial.println("initialisation bluetooth");
+
 }
 
 
 
-void ecouterBluetooth(void) {
+void ecouterBluetooth(Servo d, Servo g) {
 
-  char commande; // manuel "m" , cartographie "c"
-  if (mavoieserie.available()) {
-    commande = mavoieserie.read();
+
+
+  if (!controleBluetoothActif) {
+    Serial.println("bluetooth non connecté");
+  }
+  if (Serial1.available()) {
+    commande = Serial1.read();
+
   }
   if (!controleBluetoothActif && commande == 'm' ) {
     controleBluetoothActif = true;
     commande = ' ';
-  } else {
-    while ( controleBluetoothActif ) {
-      switch (commande) {
-        case 'z':
-          // avancer
-          break;
-        case 's':
-        // reculer
-          break;
-        case 'q':
-        // tourner à gauche
-          break;
-        case 'd':
-        // tourner a droite 
-          break;
-        case 'c':
-        // quitter la cartographie
-        controleBluetoothActif = false;
-        default:
+    Serial.println("bluetooth connecté");
+  }
+  while ( controleBluetoothActif ) {
 
-          break;
-      }
+    if (Serial1.available()) {
+      commande = Serial1.read();
+
+    }
+    switch (commande) {
+      case 'z':
+        // avancer
+        Serial.println("avancer");
+        avancer(g, d, 1600);
+        break;
+      case 's':
+        // reculer
+        arretTotal(d, g, 500);
+        reculer(d, g);
+        Serial.println("reculer");
+        break;
+      case 'q':
+        // tourner à gauche
+        Serial.println(" tourner à gauche");
+        tournerGaucheBT( g,  d);
+        break;
+      case 'd':
+        // tourner a droite
+        tournerDroiteBT( g,  d);
+        Serial.println("  tourner a droite");
+        break;
+      case 'c':
+        // passer en mode auto
+        arretTotal(d, g, 1000);
+        controleBluetoothActif = false;
+      default:
+
+        break;
     }
 
+
   }
-}*/
+}
