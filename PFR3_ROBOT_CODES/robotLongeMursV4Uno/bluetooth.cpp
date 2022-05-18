@@ -1,4 +1,4 @@
-
+/*
 #include "bluetooth.h"
 #include <SoftwareSerial.h>
 #define BLUETOOTH_RX 12
@@ -46,4 +46,4 @@ void ecouterBluetooth(void) {
     }
 
   }
-}
+}*/

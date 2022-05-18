@@ -20,8 +20,7 @@ volatile bool isEvitementObstacle = false;//volatile car ces variables peuvent e
 volatile bool isPlusDeMur = false;
 volatile bool isRedresseDroit = false;
 volatile bool isRedresseGauche = false;
-volatile bool bloquePremiereBoucle = true;
-volatile bool finDeMur = true;
+volatile bool finDeMur = false;
 
 unsigned long startTime;
 unsigned long currentTime;
@@ -29,11 +28,7 @@ const unsigned long period = 1000;
 
 //ISR
 void evitementObstacle(void) {
-  if (bloquePremiereBoucle) {
-    bloquePremiereBoucle = false;
-  } else {
-    isEvitementObstacle = true;
-  }
+  isEvitementObstacle = true;
 }
 void plusDeMur(void) {
   isPlusDeMur = true;
@@ -44,7 +39,6 @@ void redresseDroit(void) {
 void redresseGauche(void) {
   isRedresseGauche = true;
 }
-
 void finPlusDeMur(void) {
   finDeMur = true;
 }
@@ -64,6 +58,9 @@ void setup()
   pinMode(4, INPUT_PULLUP);
   pinMode(5, INPUT_PULLUP);
   pinMode(6, INPUT_PULLUP);
+  //pin qui déclenchent les interruptions chez la UNO
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH); //déclenche interruption en passant à LOW
 
   //déclaration des interruptions
   attachInterrupt(digitalPinToInterrupt(2), evitementObstacle, FALLING);//quand pin 2 passe de HIGH à LOW execute l'ISR arretUrgence
@@ -77,8 +74,8 @@ void setup()
 
   //servo.attach() positionne moteurs à la derniere valeur utilisee via servo.write();
   sg.write(1500);//positionne les roues à l'arret
-  sg.attach(9);//  paire droite (CH2)
   sd.write(1500);
+  sg.attach(9);//  paire droite (CH2)
   sd.attach(10); // paire gauche (CH1)(oui il y a inversion)
 
   //on fait avancer le robot tout droit
@@ -107,6 +104,10 @@ void loop() {
     arretTotal(sg, sd, 500);
     //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
     tournerGauche(sd, sg);
+    //previent la UNO qu'il doit scruter la fin de plus de mur
+    digitalWrite(13, LOW);
+    delay(50);
+    digitalWrite(13, HIGH);
     delay(500);
     //on remet le robot droit en marche avant
     avancer(sg, sd, 1580);
@@ -116,7 +117,7 @@ void loop() {
 
   else if (isRedresseDroit) {
     sd.writeMicroseconds(1650);
-    delay(100);
+    delay(80);
     sd.writeMicroseconds(1580);
     //on prépare la prochaine interruption en cas de redressage à droite
     isRedresseDroit = false;
@@ -133,7 +134,7 @@ void loop() {
   else if (finDeMur) {
     attachInterrupt(digitalPinToInterrupt(3), plusDeMur,  FALLING);
     finDeMur = false;
-  }
+    }
   /*
      SUPPRIMER LES DELAY POUR QUE L'ENVOI SOIT PRECIS EN PERIODE
   */
