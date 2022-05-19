@@ -17,7 +17,11 @@ void tournerDroite(Servo rouesDroites, Servo rouesGauches);
 void avancer(Servo rouesDroites, Servo rouesGauches, int millisecondes);
 void reculer (Servo rouesDroites, Servo rouesGauches);
 
-void tournerGaucheBT(Servo rouesGauches, Servo rouesDroites);
+void tournerGauche_90_BT(Servo rouesGauches, Servo rouesDroites);
 
- void tournerDroiteBT(Servo rouesGauches, Servo rouesDroites);
+ void tournerDroite_90_BT(Servo rouesGauches, Servo rouesDroites);
+
+ void tournerGauche_petit_BT(Servo rouesGauches, Servo rouesDroites);
+
+  void tournerDroite_petit_BT(Servo rouesGauches, Servo rouesDroites);
 #endif
