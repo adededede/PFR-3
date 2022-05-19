@@ -7,7 +7,8 @@
 
 #include "fonctions_robot.h"
 #include "fonctions_Moteurs.h"
-
+#include "bluetooth.h"
+#include <Scheduler.h>
 //déclare sd et sg de type Servo
 Servo sg, sd;
 
@@ -20,64 +21,57 @@ volatile bool isEvitementObstacle = false;//volatile car ces variables peuvent e
 volatile bool isPlusDeMur = false;
 volatile bool isRedresseDroit = false;
 volatile bool isRedresseGauche = false;
-volatile bool finDeMur = false;
 
 unsigned long startTime;
 unsigned long currentTime;
 const unsigned long period = 1000;
 
+
 void setup()
 {
-  noInterrupts();
   //initialise le timer
   startTime = millis();
-
   //initialisation de la communication avec le moniteur série
   Serial.begin(9600);
-  Serial.println("setup");
+  initBluetooth();
+ initEncodeurs() ;
+  //servo.attach() positionne moteurs à la derniere valeur utilisee via servo.write();
+  sg.write(1500);//positionne les roues à l'arret
+  sd.write(1500);
+  sg.attach(9);//  paire droite
+  sd.attach(10); // paire gauche (oui il y a inversion)
 
-  // init bluetooth
- initBluetooth();
-
-  // init encodeur
-
-  initEncodeurs() ;
   //pin utilisee pour le bip
   pinMode(bipPin, OUTPUT);
   //déclaration des pins qui lisent les déclenchement d'interruptions
-  pinMode(2, INPUT_PULLUP);//INPUT_PULLUP ; utilisation résistance interne
+  pinMode(2, INPUT_PULLUP);//INUPUT_PULLUP ; utilisation résistance interne
   pinMode(3, INPUT_PULLUP);
   pinMode(4, INPUT_PULLUP);
   pinMode(5, INPUT_PULLUP);
-  pinMode(6, INPUT_PULLUP);
-  //pin qui déclenchent les interruptions chez la UNO
-  pinMode(13, OUTPUT);
-  digitalWrite(13, HIGH); //déclenche interruption en passant à LOW
 
   //déclaration des interruptions
   attachInterrupt(digitalPinToInterrupt(2), evitementObstacle, FALLING);//quand pin 2 passe de HIGH à LOW execute l'ISR arretUrgence
   attachInterrupt(digitalPinToInterrupt(3), plusDeMur,  FALLING);
   attachInterrupt(digitalPinToInterrupt(4), redresseDroit, FALLING);
   attachInterrupt(digitalPinToInterrupt(5), redresseGauche, FALLING);
-  attachInterrupt(digitalPinToInterrupt(6), finPlusDeMur, FALLING);
 
   //faire 3 bips pour annoncer départ du robot
-  //bipInitialisation();
-
-  //servo.attach() positionne moteurs à la derniere valeur utilisee via servo.write();
-  sg.write(1500);//positionne les roues à l'arret
-  sd.write(1500);//1000 2000 1500
-  sg.attach(9);//  paire droite (CH2)
-  sd.attach(10); // paire gauche (CH1)(oui il y a inversion)
+  bipInitialisation();
 
   //on fait avancer le robot tout droit
-  avancer(sd, sg, 1600);
+  avancer(sd, sg, 1580);
 
-  interrupts();
+  Scheduler.startLoop(loopBluetooth);
+
 }//fin setup
 
-void loop() {
+void loopBluetooth(){
+ ecouterBluetooth(sg,sd); 
+ yield();
+}
 
+void loop() {
+    
   if (isEvitementObstacle) {
     //arret
     arretTotal(sg, sd, 500);
@@ -88,59 +82,46 @@ void loop() {
     //on prépare la prochaine interruption en cas de d'obstacle
     isEvitementObstacle = false;
   }
-
-  else if (isPlusDeMur) {
+  
+  else if (isPlusDeMur) { //fonctionne si au moins un des deux capteurs voit le mur
     //arret
     arretTotal(sg, sd, 500);
     //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
     tournerGauche(sd, sg);
-    //on enleve interruption plus de mur le temps que le robot reviennent pres du mur
-    //apres avoir tourne a gauche
-    detachInterrupt(digitalPinToInterrupt(3));
-    //previent la UNO qu'il doit scruter la fin de plus de mur
-    digitalWrite(13, LOW);
-    delay(50);
-    digitalWrite(13, HIGH);
-    delay(500);
     //on remet le robot droit en marche avant
     avancer(sg, sd, 1580);
+    delay(2000);
     //on prépare la prochaine interruption en cas d'abscence de mur
     isPlusDeMur = false;
   }
-
+  
   else if (isRedresseDroit) {
     sd.writeMicroseconds(1650);
-    delay(80);
+    delay(100);
     sd.writeMicroseconds(1580);
     //on prépare la prochaine interruption en cas de redressage à droite
     isRedresseDroit = false;
   }
-
+  
   else if (isRedresseGauche) {
     sg.writeMicroseconds(1650);
-    delay(150);
+    delay(130);
     sg.writeMicroseconds(1580);
     //on prépare la prochaine interruption en cas de redressage à gauche
     isRedresseGauche = false;
   }
-
-  else if (finDeMur) {
-    attachInterrupt(digitalPinToInterrupt(3), plusDeMur,  FALLING);
-    finDeMur = false;
-  }
   /*
-     SUPPRIMER LES DELAY POUR QUE L'ENVOI SOIT PRECIS EN PERIODE
-  */
-  /*//envoi de données périodiquement
-    currentTime = millis();
-    if (currentTime - startTime >= period)//si periode écoulee
-    {
-    //envoi données
+   * SUPPRIMER LES DELAY POUR QUE L'ENVOI SOIT PRECIS EN PERIODE
+   */
+  //envoi de données périodiquement
+  currentTime = millis();
+  if (currentTime - startTime >= period)//si periode écoulee
+  {
+    //envoi données 
     startTime = currentTime;//remise a 0 du timer
-    }*/
-
-}
-/*//fin loop*/
+  }
+  yield(); // passe la main au bluetooth 
+}//fin loop
 
 //ISR
 void evitementObstacle(void) {
@@ -154,7 +135,4 @@ void redresseDroit(void) {
 }
 void redresseGauche(void) {
   isRedresseGauche = true;
-}
-void finPlusDeMur(void) {
-  finDeMur = true;
 }

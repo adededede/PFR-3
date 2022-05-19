@@ -1,3 +1,4 @@
+
 #include "fonctions_Moteurs.h"
 #include <SimplyAtomic.h>
 #define A_CH1 30// GAUCHE
@@ -5,6 +6,7 @@
 
 #define A_CH2 22// DROIT 
 #define B_CH2 24
+
 // POUR MESURER LA VITESSE ON MESURE LE TEMPS ECOULE ENTRE 2 TRIGGER
 //https://www.youtube.com/watch?v=HRaZLCBFVDE
 // variables de stockage globale;
@@ -78,6 +80,8 @@ void readEncodeurDroit(void) {
   Serial.println(velocity_droite2);
 }
 
+
+
 void StopPaireDeRoue(Servo paireDeRoue) {
   paireDeRoue.writeMicroseconds(1500);
 }
@@ -97,18 +101,20 @@ void arretTotal(Servo rouesGauches, Servo RouesDroites, int delai) {
 void tournerGauche(Servo rouesGauches, Servo rouesDroites) {
   rouesGauches.writeMicroseconds(1500);
   rouesDroites.writeMicroseconds(1700);
-  delay(600);
+  delay(950);
 }
 
 void tournerDroite(Servo rouesDroites, Servo rouesGauches) {
   rouesDroites.writeMicroseconds(1300);
   rouesGauches.writeMicroseconds(1600);
-  delay(700);
+  delay(670);
 }
 
 void avancer(Servo rouesDroites, Servo rouesGauches, int millisecondes) {
-  rouesDroites.writeMicroseconds(millisecondes);//1580
+  rouesDroites.writeMicroseconds(millisecondes);
   rouesGauches.writeMicroseconds(millisecondes);
+
+
 }
 
 void reculer (Servo rouesDroites, Servo rouesGauches) {
