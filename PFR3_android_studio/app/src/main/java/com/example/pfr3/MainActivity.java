@@ -24,9 +24,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.RenderEffect;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.LocationManager;
 import android.os.Build;
@@ -41,19 +38,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.time.DateTimeException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -156,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
                     case STATE_READ:
                         Character recu = (Character) message.obj;
-                        Toast.makeText(getApplicationContext(),"RECU : "+recu,Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(),"RECU : "+recu,Toast.LENGTH_SHORT).show();
                         //on dessine ce que l'on a recu
                         dessiner(recu);
                         break;
@@ -248,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller à droite
                 if(thread_connecte!=null){
-                    Toast.makeText(getApplicationContext(),"DROITE",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"DROITE",Toast.LENGTH_SHORT).show();
                     thread_connecte.write('d');
                 }
             }
@@ -258,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller à gauche
                 if(thread_connecte!=null){
-                    Toast.makeText(getApplicationContext(),"GAUCHE",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"GAUCHE",Toast.LENGTH_SHORT).show();
                     thread_connecte.write('q');
                 }
             }
@@ -268,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller tout droit
                 if(thread_connecte!=null){
-                    Toast.makeText(getApplicationContext(),"AVANT",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"AVANT",Toast.LENGTH_SHORT).show();
                     thread_connecte.write('z');
                 }
             }
@@ -278,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 //on envoie à l'appareil bluetooth le signal pour aller en arrière
                 if(thread_connecte!=null){
-                    Toast.makeText(getApplicationContext(),"ARRIERE",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(),"ARRIERE",Toast.LENGTH_SHORT).show();
                     thread_connecte.write('s');
                 }
             }
@@ -403,7 +395,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     this.btnDroit.setVisibility(View.GONE);
                     //modre automatique
                     if(thread_connecte!=null){
-                        Toast.makeText(getApplicationContext(),"c",Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(),"c",Toast.LENGTH_SHORT).show();
                         thread_connecte.write('c');
                     }
                 }
@@ -416,7 +408,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     this.btnDroit.setVisibility(View.VISIBLE);
                     //modre manuel
                     if(thread_connecte!=null){
-                        Toast.makeText(getApplicationContext(),"m",Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(),"m",Toast.LENGTH_SHORT).show();
                         thread_connecte.write('m');
                     }
                 }
@@ -434,7 +426,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     this.btnDroit.setVisibility(View.GONE);
                     //modre automatique
                     if(thread_connecte!=null){
-                        Toast.makeText(getApplicationContext(),"c",Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(),"c",Toast.LENGTH_SHORT).show();
                         thread_connecte.write('c');
                     }
                 }
@@ -446,7 +438,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     this.btnDroit.setVisibility(View.VISIBLE);
                     //modre manuel
                     if(thread_connecte!=null){
-                        Toast.makeText(getApplicationContext(),"m",Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(),"m",Toast.LENGTH_SHORT).show();
                         thread_connecte.write('m');
                     }
                 }
@@ -488,13 +480,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void dessiner(Character c){
         //DESSINER SUR IMAGE
+        b = Bitmap.createBitmap(cartographie.getWidth(),cartographie.getHeight(),Bitmap.Config.RGB_565);
         if(dessin==0){
-            b = Bitmap.createBitmap(cartographie.getWidth(),cartographie.getHeight(),Bitmap.Config.RGB_565);
-        }
+            //b = Bitmap.createBitmap(cartographie.getWidth(),cartographie.getHeight(),Bitmap.Config.RGB_565);
+            date_cartographie = LocalDateTime.now();
+        }/*
         else{
-            BitmapDrawable drawable = (BitmapDrawable) cartographie.getDrawable();
-            b = drawable.getBitmap();
-        }
+            //je ne peux pas convertir drawable to bitmap
+            //android.graphics.drawable.ColorDrawable cannot be cast to android.graphics.drawable.BitmapDrawable
+            b = ((BitmapDrawable)cartographie.getDrawable()).getBitmap();
+        }*/
         Canvas tempCanvas = new Canvas(b);
         LocalDateTime date_courante;
         Paint peinture = new Paint();
@@ -582,8 +577,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tempCanvas.drawLine(x_depart,y_depart,x_arrive,y_arrive,peinture);
         }
         dessin++;
-        //on dessine tempBitmap sur le canvas
-        tempCanvas.drawBitmap(b, 0, 0, null);
     }
 
     private void affichagePeripherique() {
@@ -599,7 +592,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             pairedDevices = bluetoothManager.getAdapter().getBondedDevices();
             //si le discovery est activé
             if(bluetoothManager.getAdapter().isDiscovering()){
-                Toast.makeText(this, "discovery en cours ...",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "discovery en cours ...",Toast.LENGTH_SHORT).show();
                 //on le désactive
                 bluetoothManager.getAdapter().cancelDiscovery();
             }
@@ -729,37 +722,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             flux_sortant = o;
         }
 
+
         public  void run(){
-            byte[] buffer = new byte[1024];
-            int bytes = 0;
+            byte buffer = 0;
+            Log.e("THREADCONNECTE -> RUN","AVANT WHILE");
             while(true){
                 try{
-                    buffer[bytes] = (byte) flux_entrant.read();
-                    String message_recu;
-                    if(buffer[bytes] == '\0'){
-                        message_recu = new String(buffer,0,bytes);
-                        Log.e("THREADCONNECTE -> RUN","READ : "+message_recu);
-                        handler.obtainMessage(STATE_READ,message_recu);
-                        bytes=0;
-                    }
-                    else{
-                        bytes++;
-                    }
+                    buffer = (byte) flux_entrant.read();
+                    char message_recu = (char)buffer;
+                    Log.e("THREADCONNECTE -> RUN","READ : "+message_recu);
+                    handler.obtainMessage(STATE_READ,message_recu).sendToTarget();
                 }
                 catch(IOException e){
                     e.printStackTrace();
                     break;
                 }
-            }
-        }
-
-        public void write(String s){
-            byte[] bytes = s.getBytes();
-            try{
-                flux_sortant.write(bytes);
-            }
-            catch(IOException e){
-                Log.e("THREADCONNECTE -> WRITE","MESSAGE NON ENVOYE : "+s);
             }
         }
 

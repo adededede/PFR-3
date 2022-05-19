@@ -147,7 +147,7 @@
             android:layout_height="232dp"
             android:layout_marginStart="20dp"
             android:layout_marginTop="10dp"
-            app:srcCompat="@color/white" />
+            app:srcCompat="@drawable/fond_blanc_svg" />
 
         <TableRow
             android:id="@+id/catographie_btn"
