@@ -147,13 +147,13 @@ void tournerDroite_90_BT(Servo rouesGauches, Servo rouesDroites) {
 void tournerGauche_petit_BT(Servo rouesGauches, Servo rouesDroites) {
   rouesDroites.writeMicroseconds(1700);
   rouesGauches.writeMicroseconds(1300);
-  delay(100);
+  delay(250);
   arretTotal(rouesGauches, rouesDroites, 500);
 }
 
 void tournerDroite_petit_BT(Servo rouesGauches, Servo rouesDroites) {
   rouesGauches.writeMicroseconds(1700);
   rouesDroites.writeMicroseconds(1300);
-  delay(100);
+  delay(250);
   arretTotal(rouesGauches, rouesDroites, 500);
 }
