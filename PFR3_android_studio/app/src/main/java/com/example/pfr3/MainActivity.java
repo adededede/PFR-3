@@ -41,26 +41,29 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-    //https://stackoverflow.com/questions/18657427/ioexception-read-failed-socket-might-closed-bluetooth-on-android-4-3
-    //https://github.com/edufolly/flutter_bluetooth_serial/issues/18
-    //https://www.youtube.com/watch?v=TLXpDY1pItQ
-    //https://www.youtube.com/watch?v=Kfe3IYhiKFo
-    //https://www.geeksforgeeks.org/all-about-hc-05-bluetooth-module-connection-with-android/
 
     //variable
-    int clicAutomatique,clicManuel,clicCommencer = 0;
+    boolean clicManuel,clicCommencer = false;
+    boolean clicAutomatique = true;
     String dernierFragement;
+    List<Character> reception_cartographie;
+    int dessin = 0;
 
     //Données qu'on prend du design
     ImageView cartographie;
@@ -69,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     androidx.appcompat.widget.Toolbar tBar;
     TextView texte_nom,texte_vitesse,texte_position,texte_distance;
     Button btnGauche,btnDroit, btnBas, btnHaut,btnCommencer,btnRecommencer,btnArreter;
+    LocalDateTime date_cartographie;
 
     //donnees bluetooth
     BluetoothManager bluetoothManager;
@@ -92,8 +96,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Discovery has found a device. Get the BluetoothDevice
-                // object and its info from the Intent.
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 //Toast.makeText(context, "nom : "+device.getName()+"\n@MAC : "+device.getAddress(),Toast.LENGTH_LONG).show();
                 //on initialise le set contenant les devices inconnus
@@ -130,8 +132,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnRecommencer = findViewById(R.id.btnRecommencer);
         btnCommencer = findViewById(R.id.btnCommencer);
         btnArreter = findViewById(R.id.btnStop);
-        bluetoothManager = getSystemService(BluetoothManager.class);
         cartographie = findViewById(R.id.view_cartographie);
+
+        bluetoothManager = getSystemService(BluetoothManager.class);
+        reception_cartographie = new ArrayList<>();
         handler = new Handler(Looper.getMainLooper()){
             @Override
             public void handleMessage(Message message){
@@ -149,13 +153,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                         break;
                     case STATE_READ:
-                        String recu = message.obj.toString();
+                        Character recu = (Character) message.obj;
                         Toast.makeText(getApplicationContext(),"RECU : "+recu,Toast.LENGTH_SHORT).show();
-                        switch (recu.toLowerCase()){
-                            //case on recoit une vitesse:
-                            //  on fait ça
-                            //  break;
-                        }
+                        //on dessine ce que l'on a recu
+                        dessiner(recu);
                         break;
                 }
             }
@@ -176,31 +177,53 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnCommencer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(clicCommencer%2==1){
+                clicCommencer = !clicCommencer;
+                if(clicCommencer==false){
                     btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
                     btnArreter.setVisibility(View.GONE);
                     btnRecommencer.setVisibility(View.GONE);
                 }
                 else{
+                    //on envois c pour lancer le cartographie
+                    thread_connecte.write('c');
                     btnCommencer.setBackgroundResource(R.mipmap.ic_pause);
                     btnArreter.setVisibility(View.VISIBLE);
                     btnRecommencer.setVisibility(View.VISIBLE);
                 }
-                clicCommencer++;
             }
         });
         btnRecommencer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
-                clicCommencer=0;
+                clicCommencer=!clicCommencer;
+                if(clicCommencer==false){
+                    btnCommencer.setBackgroundResource(R.mipmap.ic_pause);
+                    //on vide l'image
+                    cartographie.setImageBitmap(null);
+                    //on relance la cartographie
+                    dessin = 0;
+                    thread_connecte.write('c');
+                }
+                else{
+                    btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
+                    btnArreter.setVisibility(View.GONE);
+                    btnRecommencer.setVisibility(View.GONE);
+                }
             }
         });
         btnArreter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
-                clicCommencer=0;
+                clicCommencer=!clicCommencer;
+                if(clicCommencer==false){
+                    btnCommencer.setBackgroundResource(R.mipmap.ic_pause);
+                }
+                else{
+                    btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
+                    dessin = 0;
+                    //j'envois m pour passer en mode manunel et stopper la cartographie
+                    thread_connecte.write('m');
+                }
             }
         });
         btnDroit.setOnClickListener(new View.OnClickListener() {
@@ -248,8 +271,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ActionBarDrawerToggle toggle= new ActionBarDrawerToggle(this, dLayout,tBar,R.string.navigation_drawer_open,R.string.navigation_drawer_close);
         dLayout.addDrawerListener(toggle);
         toggle.syncState();
-
-        //On dessine le rectangle de contour
 
         //add an event listener to design items
         nView.setNavigationItemSelectedListener(this);
@@ -355,15 +376,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             //mode automatique
             case R.id.navigation_toolbar_automatique:
-                //connexion.connexion(bluetoothManager.getAdapter().getRemoteDevice("98:D3:91:FD:AD:50"));
-                //connexion.write("prout".getBytes());
                 item.setChecked(false);
-                if(clicAutomatique%2 == 1){
+                clicAutomatique = !clicAutomatique;
+                if(clicAutomatique==true){
                     item.setIcon(R.mipmap.ic_mode_on);
-                    this.btnBas.setVisibility(View.VISIBLE);
-                    this.btnHaut.setVisibility(View.VISIBLE);
-                    this.btnGauche.setVisibility(View.VISIBLE);
-                    this.btnDroit.setVisibility(View.VISIBLE);
+                    this.btnBas.setVisibility(View.GONE);
+                    this.btnHaut.setVisibility(View.GONE);
+                    this.btnGauche.setVisibility(View.GONE);
+                    this.btnDroit.setVisibility(View.GONE);
                     //modre automatique
                     if(thread_connecte!=null){
                         Toast.makeText(getApplicationContext(),"c",Toast.LENGTH_SHORT).show();
@@ -373,22 +393,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 else{
                     //remettre l'icon du mode manuel en on
                     item.setIcon(null);
-                    this.btnBas.setVisibility(View.GONE);
-                    this.btnHaut.setVisibility(View.GONE);
-                    this.btnGauche.setVisibility(View.GONE);
-                    this.btnDroit.setVisibility(View.GONE);
+                    this.btnBas.setVisibility(View.VISIBLE);
+                    this.btnHaut.setVisibility(View.VISIBLE);
+                    this.btnGauche.setVisibility(View.VISIBLE);
+                    this.btnDroit.setVisibility(View.VISIBLE);
                     //modre manuel
                     if(thread_connecte!=null){
                         Toast.makeText(getApplicationContext(),"m",Toast.LENGTH_SHORT).show();
                         thread_connecte.write('m');
                     }
                 }
-                clicAutomatique++;
                 break;
             //mode manuel
             case R.id.navigation_toolbar_manuel:
                 item.setChecked(false);
-                if(clicManuel%2 == 1){
+                clicManuel = !clicManuel;
+                if(clicManuel==false){
                     //remettre l'icon du mode automatique en on
                     item.setIcon(null);
                     this.btnBas.setVisibility(View.GONE);
@@ -413,7 +433,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         thread_connecte.write('m');
                     }
                 }
-                clicManuel++;
                 break;
         }
         //on ferme la bar de naviguation
@@ -450,8 +469,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dernierFragement = tag;
     }
 
-    private void dessiner(){
+    private void dessiner(Character c){
         //DESSINER SUR IMAGE
+        //TODO donner à bitmap la largeur de notre image de cartographie
+        Bitmap tempBitmap = Bitmap.createBitmap(cartographie.getWidth(),cartographie.getHeight(),Bitmap.Config.RGB_565);
+        Canvas tempCanvas = new Canvas(tempBitmap);
+        Paint peinture = new Paint();
+        peinture.setColor(Color.BLACK);
+        int haut,bas,droite,gauche;
+
+        //si on recupère z, pour avancer
+        if(c.equals('z')||c.equals('Z')){
+            if(dessin==0){
+                //c'est la première fois que l'on passe
+                date_cartographie = LocalDateTime.now();
+                //on définis la position de départ
+                haut=10;
+                bas=10;
+                droite=10;
+                gauche=10;
+            }
+            //on dessine une droite vers le haut
+            RectF rectangle = new RectF(1,1,20,20);
+            tempCanvas.drawRoundRect(rectangle,2,2,peinture);
+        }
+        //si on recupère q, pour gauche
+        else if(c.equals('q')||c.equals('Q')){
+            //on dessine une droite vers la gauche
+            RectF rectangle = new RectF(1,1,20,20);
+            tempCanvas.drawRoundRect(rectangle,2,2,peinture);
+        }
+        //si on recupère d, pour avancer droite
+        else if(c.equals('d')||c.equals('D')){
+            //on dessine une droite vers la droite
+            RectF rectangle = new RectF(1,1,20,20);
+            tempCanvas.drawRoundRect(rectangle,2,2,peinture);
+        }
+        dessin++;
+        //on dessine tempBitmap sur le canvas
+        tempCanvas.drawBitmap(tempBitmap, 0, 0, null);
     }
 
     private void affichagePeripherique() {

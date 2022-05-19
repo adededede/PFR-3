@@ -150,7 +150,7 @@
             app:srcCompat="@color/white" />
 
         <ProgressBar
-            android:id="@+id/progressBar_navigation"
+            android:id="@+id/progressBar_cartographie"
             android:layout_width="287dp"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             android:layout_gravity="center"
