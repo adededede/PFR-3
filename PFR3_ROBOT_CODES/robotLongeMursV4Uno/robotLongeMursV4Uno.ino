@@ -101,7 +101,7 @@ void loop() {
   }
   //declenche "redresseGauche" dans le programme de la DUE
   //diffLaterale < 15 pour éviter le cas où un seul capteur voit le mur après interruption "plusDeMur" dans le programme DUE
-  else if ((diffLaterale > 0 && diffLaterale < 5) || ((c2distance > 45 || c3distance > 45) && (c2distance < 70 &&  c3distance < 70))) { //si positif, alors robot trop vers la droite
+  else if ((diffLaterale > 0 && diffLaterale < 5) || ((c2distance > 35 || c3distance > 35) && (c2distance < 70 &&  c3distance < 70))) { //si positif, alors robot trop vers la droite
     digitalWrite(redresseGPin, LOW);
     delay(50);
     digitalWrite(redresseGPin, HIGH);

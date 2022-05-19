@@ -9,6 +9,10 @@
 #include "fonctions_Moteurs.h"
 #include "bluetooth.h"
 #include <Scheduler.h>
+
+#define AVANCER 'z'
+#define TOURNER_GAUCHE 'q'
+#define TOURNER_DROIT 'd'
 //déclare sd et sg de type Servo
 Servo sg, sd;
 
@@ -25,7 +29,7 @@ volatile bool isRedresseGauche = false;
 unsigned long startTime;
 unsigned long currentTime;
 const unsigned long period = 1000;
-
+volatile boolean CartographieActive = false;
 
 void setup()
 {
@@ -59,68 +63,78 @@ void setup()
   bipInitialisation();
 
   //on fait avancer le robot tout droit
-  avancer(sd, sg, 1580);
+  //avancer(sd, sg, 1580);
 
   //Scheduler.startLoop(loopBluetooth);
 
 }//fin setup
 
-void loopBluetooth() {
-  ecouterBluetooth(sg, sd);
-  //yield();
-}
-
 void loop() {
 
-  if (isEvitementObstacle) {
-    //arret
-    arretTotal(sg, sd, 500);
-    //tourne à droite pour éviter obstacle (tourne à 90° a droite)
-    tournerDroite(sg, sd);
-    //on remet le robot droit en marche avant
-    avancer(sg, sd, 1580);
-    //on prépare la prochaine interruption en cas de d'obstacle
-    isEvitementObstacle = false;
+  CartographieActive = ecouterBluetooth(sg, sd, CartographieActive);
+  Serial.println(CartographieActive);
+
+  if (CartographieActive) {
+
+
+    if (isEvitementObstacle) {
+      //arret
+      arretTotal(sg, sd, 500);
+      //tourne à droite pour éviter obstacle (tourne à 90° a droite)
+      envoyerEtat(TOURNER_DROIT);
+      tournerDroite(sg, sd);
+      //on remet le robot droit en marche avant
+      envoyerEtat(AVANCER);
+      avancer(sg, sd, 1580);
+      //on prépare la prochaine interruption en cas de d'obstacle
+      isEvitementObstacle = false;
+    }
+
+    else if (isPlusDeMur) { //fonctionne si au moins un des deux capteurs voit le mur
+      //arret
+      arretTotal(sg, sd, 500);
+      //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
+      envoyerEtat(TOURNER_GAUCHE);
+      tournerGauche(sd, sg);
+      //on remet le robot droit en marche avant
+      envoyerEtat(AVANCER);
+      avancer(sg, sd, 1580);
+      delay(2000);
+      //on prépare la prochaine interruption en cas d'abscence de mur
+      isPlusDeMur = false;
+    }
+
+    if (isRedresseDroit) {
+      sd.writeMicroseconds(1650);
+      delay(70);
+      sd.writeMicroseconds(1580);
+      //on prépare la prochaine interruption en cas de redressage à droite
+      isRedresseDroit = false;
+    }
+
+    if (isRedresseGauche) {
+      sg.writeMicroseconds(1650);
+      delay(100);
+      sg.writeMicroseconds(1580);
+      //on prépare la prochaine interruption en cas de redressage à gauche
+      isRedresseGauche = false;
+    }
+    /*
+       SUPPRIMER LES DELAY POUR QUE L'ENVOI SOIT PRECIS EN PERIODE
+    */
+    //envoi de données périodiquement
+    currentTime = millis();
+    if (currentTime - startTime >= period)//si periode écoulee
+    {
+      //envoi données
+      startTime = currentTime;//remise a 0 du timer
+    }
+    //yield(); // passe la main au bluetooth
   }
 
-  else if (isPlusDeMur) { //fonctionne si au moins un des deux capteurs voit le mur
-    //arret
-    arretTotal(sg, sd, 500);
-    //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
-    tournerGauche(sd, sg);
-    //on remet le robot droit en marche avant
-    avancer(sg, sd, 1580);
-    delay(2000);
-    //on prépare la prochaine interruption en cas d'abscence de mur
-    isPlusDeMur = false;
-  }
 
-  if (isRedresseDroit) {
-    sd.writeMicroseconds(1650);
-    delay(80);
-    sd.writeMicroseconds(1580);
-    //on prépare la prochaine interruption en cas de redressage à droite
-    isRedresseDroit = false;
-  }
 
-  if (isRedresseGauche) {
-    sg.writeMicroseconds(1650);
-    delay(100);
-    sg.writeMicroseconds(1580);
-    //on prépare la prochaine interruption en cas de redressage à gauche
-    isRedresseGauche = false;
-  }
-  /*
-     SUPPRIMER LES DELAY POUR QUE L'ENVOI SOIT PRECIS EN PERIODE
-  */
-  //envoi de données périodiquement
-  currentTime = millis();
-  if (currentTime - startTime >= period)//si periode écoulee
-  {
-    //envoi données
-    startTime = currentTime;//remise a 0 du timer
-  }
-  //yield(); // passe la main au bluetooth
+
 }//fin loop
 
 //ISR
