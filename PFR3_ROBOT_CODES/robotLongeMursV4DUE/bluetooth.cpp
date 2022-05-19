@@ -32,7 +32,7 @@ boolean ecouterBluetooth(Servo d, Servo g, boolean _CartographieActive) {
       switch (commande) {
         case 'z':
           // avancer
-          avancer(g, d, 1800);
+          avancer(g, d, 1600);
           commande = ' ';
           Serial.println("avancer");
           break;
