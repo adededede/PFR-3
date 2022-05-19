@@ -48,6 +48,7 @@ import com.google.android.material.navigation.NavigationView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,8 +63,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     boolean clicManuel,clicCommencer = false;
     boolean clicAutomatique = true;
     String dernierFragement;
-    List<Character> reception_cartographie;
     int dessin = 0;
+    float x_depart,x_arrive,y_depart,y_arrive = 0;
+    String direction = "y+";
+    Bitmap b;
 
     //Données qu'on prend du design
     ImageView cartographie;
@@ -135,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         cartographie = findViewById(R.id.view_cartographie);
 
         bluetoothManager = getSystemService(BluetoothManager.class);
-        reception_cartographie = new ArrayList<>();
         handler = new Handler(Looper.getMainLooper()){
             @Override
             public void handleMessage(Message message){
@@ -185,7 +187,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     //on envois c pour lancer le cartographie
-                    thread_connecte.write('c');
+                    if(thread_connecte!=null){
+                        thread_connecte.write('c');
+                    }
+                    else{
+                        //erreur
+                    }
                     btnCommencer.setBackgroundResource(R.mipmap.ic_pause);
                     btnArreter.setVisibility(View.VISIBLE);
                     btnRecommencer.setVisibility(View.VISIBLE);
@@ -202,7 +209,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     cartographie.setImageBitmap(null);
                     //on relance la cartographie
                     dessin = 0;
-                    thread_connecte.write('c');
+                    if(thread_connecte!=null){
+                        thread_connecte.write('c');
+                    }
+                    else{
+                        //erreur
+                    }
                 }
                 else{
                     btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
@@ -222,7 +234,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
                     dessin = 0;
                     //j'envois m pour passer en mode manunel et stopper la cartographie
-                    thread_connecte.write('m');
+                    if(thread_connecte!=null){
+                        thread_connecte.write('m');
+                    }
+                    else{
+
+                    }
                 }
             }
         });
@@ -471,43 +488,102 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void dessiner(Character c){
         //DESSINER SUR IMAGE
-        //TODO donner à bitmap la largeur de notre image de cartographie
-        Bitmap tempBitmap = Bitmap.createBitmap(cartographie.getWidth(),cartographie.getHeight(),Bitmap.Config.RGB_565);
-        Canvas tempCanvas = new Canvas(tempBitmap);
+        if(dessin==0){
+            b = Bitmap.createBitmap(cartographie.getWidth(),cartographie.getHeight(),Bitmap.Config.RGB_565);
+        }
+        else{
+            BitmapDrawable drawable = (BitmapDrawable) cartographie.getDrawable();
+            b = drawable.getBitmap();
+        }
+        Canvas tempCanvas = new Canvas(b);
+        LocalDateTime date_courante;
         Paint peinture = new Paint();
         peinture.setColor(Color.BLACK);
-        int haut,bas,droite,gauche;
+        //63dp = 1cm (environ) sachant que l'on prend comme echelle 1cm sur l'écran = 250cm dans la réalité
+        //vu qu'on parcours environ 50cm par seconde
+        //en 1 sec  il parcours 50 cm soit 12.6dp
+        //et que la plupart des pièces on des largeurs et longueurs de 8m environ
 
         //si on recupère z, pour avancer
         if(c.equals('z')||c.equals('Z')){
+            date_cartographie = LocalDateTime.now();
             if(dessin==0){
-                //c'est la première fois que l'on passe
-                date_cartographie = LocalDateTime.now();
-                //on définis la position de départ
-                haut=10;
-                bas=10;
-                droite=10;
-                gauche=10;
+                //on définit la position de départ
+                x_depart=(cartographie.getWidth()/2);
+                y_depart=cartographie.getHeight()-10;
             }
-            //on dessine une droite vers le haut
-            RectF rectangle = new RectF(1,1,20,20);
-            tempCanvas.drawRoundRect(rectangle,2,2,peinture);
+            else{
+                x_depart=x_arrive;
+                y_depart=y_arrive;
+            }
         }
         //si on recupère q, pour gauche
         else if(c.equals('q')||c.equals('Q')){
+            //on calcule en fonction du temps passer
+            date_courante = LocalDateTime.now();
+            float temps_ecoule = date_courante.getSecond()-date_cartographie.getSecond();
+            switch (direction){
+                case "x+":
+                    //se déplace sur l'axe des x vers les positif
+                    x_arrive=(float)12.6*temps_ecoule+x_depart;
+                    y_arrive=y_depart;
+                    direction="y+";
+                    break;
+                case "x-":
+                    //se déplace sur l'axe des x vers les positif
+                    x_arrive=x_depart-(float)12.6*temps_ecoule;
+                    y_arrive=y_depart;
+                    direction="y-";
+                    break;
+                case "y+":
+                    x_arrive=x_depart;
+                    y_arrive=(float)12.6*temps_ecoule+y_depart;
+                    direction="x-";
+                    break;
+                case "y-":
+                    x_arrive=x_depart;
+                    y_arrive=y_depart-(float)12.6*temps_ecoule;
+                    direction="x+";
+                    break;
+            }
             //on dessine une droite vers la gauche
-            RectF rectangle = new RectF(1,1,20,20);
-            tempCanvas.drawRoundRect(rectangle,2,2,peinture);
+            tempCanvas.drawLine(x_depart,y_depart,x_arrive,y_arrive,peinture);
         }
         //si on recupère d, pour avancer droite
         else if(c.equals('d')||c.equals('D')){
-            //on dessine une droite vers la droite
-            RectF rectangle = new RectF(1,1,20,20);
-            tempCanvas.drawRoundRect(rectangle,2,2,peinture);
+            //on calcule en fonction du temps passer
+            date_courante = LocalDateTime.now();
+            float temps_ecoule = date_courante.getSecond()-date_cartographie.getSecond();
+            switch (direction){
+                case "x+":
+                    //se déplace sur l'axe des x vers les positif
+                    x_arrive=(float)12.6*temps_ecoule+x_depart;
+                    y_arrive=y_depart;
+                    direction="y-";
+                    break;
+                case "x-":
+                    //se déplace sur l'axe des x vers les positif
+                    x_arrive=x_depart-(float)12.6*temps_ecoule;
+                    y_arrive=y_depart;
+                    direction="y+";
+                    break;
+                case "y+":
+                    x_arrive=x_depart;
+                    y_arrive=(float)12.6*temps_ecoule+y_depart;
+                    direction="x+";
+                    break;
+                case "y-":
+                    x_arrive=x_depart;
+                    y_arrive=y_depart-(float)12.6*temps_ecoule;
+                    direction="x-";
+                    break;
+            }
+            //on dessine une droite vers la gauche
+            tempCanvas.drawLine(x_depart,y_depart,x_arrive,y_arrive,peinture);
         }
         dessin++;
         //on dessine tempBitmap sur le canvas
-        tempCanvas.drawBitmap(tempBitmap, 0, 0, null);
+        tempCanvas.drawBitmap(b, 0, 0, null);
     }
 
     private void affichagePeripherique() {

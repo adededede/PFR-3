@@ -143,19 +143,11 @@
 
         <ImageView
             android:id="@+id/view_cartographie"
-            android:layout_width="346dp"
-            android:layout_height="207dp"
-            android:layout_marginStart="35dp"
+            android:layout_width="373dp"
+            android:layout_height="232dp"
+            android:layout_marginStart="20dp"
             android:layout_marginTop="10dp"
             app:srcCompat="@color/white" />
-
-        <ProgressBar
-            android:id="@+id/progressBar_cartographie"
-            android:layout_width="287dp"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_gravity="center"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp" />
 
         <TableRow
             android:id="@+id/catographie_btn"
