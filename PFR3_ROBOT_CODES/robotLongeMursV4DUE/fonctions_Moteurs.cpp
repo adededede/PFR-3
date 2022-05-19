@@ -101,13 +101,13 @@ void arretTotal(Servo rouesGauches, Servo RouesDroites, int delai) {
 void tournerGauche(Servo rouesGauches, Servo rouesDroites) {
   rouesGauches.writeMicroseconds(1500);
   rouesDroites.writeMicroseconds(1700);
-  delay(950);
+  delay(900);
 }
 
 void tournerDroite(Servo rouesDroites, Servo rouesGauches) {
   rouesDroites.writeMicroseconds(1300);
   rouesGauches.writeMicroseconds(1600);
-  delay(670);
+  delay(580);
 }
 
 void avancer(Servo rouesDroites, Servo rouesGauches, int millisecondes) {

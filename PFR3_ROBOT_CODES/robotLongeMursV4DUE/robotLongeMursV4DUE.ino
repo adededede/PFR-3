@@ -34,7 +34,7 @@ void setup()
   //initialisation de la communication avec le moniteur série
   Serial.begin(9600);
   initBluetooth();
- initEncodeurs() ;
+  initEncodeurs() ;
   //servo.attach() positionne moteurs à la derniere valeur utilisee via servo.write();
   sg.write(1500);//positionne les roues à l'arret
   sd.write(1500);
@@ -61,17 +61,17 @@ void setup()
   //on fait avancer le robot tout droit
   avancer(sd, sg, 1580);
 
-  Scheduler.startLoop(loopBluetooth);
+  //Scheduler.startLoop(loopBluetooth);
 
 }//fin setup
 
-void loopBluetooth(){
- ecouterBluetooth(sg,sd); 
- yield();
+void loopBluetooth() {
+  ecouterBluetooth(sg, sd);
+  //yield();
 }
 
 void loop() {
-    
+
   if (isEvitementObstacle) {
     //arret
     arretTotal(sg, sd, 500);
@@ -82,7 +82,7 @@ void loop() {
     //on prépare la prochaine interruption en cas de d'obstacle
     isEvitementObstacle = false;
   }
-  
+
   else if (isPlusDeMur) { //fonctionne si au moins un des deux capteurs voit le mur
     //arret
     arretTotal(sg, sd, 500);
@@ -94,33 +94,33 @@ void loop() {
     //on prépare la prochaine interruption en cas d'abscence de mur
     isPlusDeMur = false;
   }
-  
-  else if (isRedresseDroit) {
+
+  if (isRedresseDroit) {
     sd.writeMicroseconds(1650);
-    delay(100);
+    delay(80);
     sd.writeMicroseconds(1580);
     //on prépare la prochaine interruption en cas de redressage à droite
     isRedresseDroit = false;
   }
-  
-  else if (isRedresseGauche) {
+
+  if (isRedresseGauche) {
     sg.writeMicroseconds(1650);
-    delay(130);
+    delay(100);
     sg.writeMicroseconds(1580);
     //on prépare la prochaine interruption en cas de redressage à gauche
     isRedresseGauche = false;
   }
   /*
-   * SUPPRIMER LES DELAY POUR QUE L'ENVOI SOIT PRECIS EN PERIODE
-   */
+     SUPPRIMER LES DELAY POUR QUE L'ENVOI SOIT PRECIS EN PERIODE
+  */
   //envoi de données périodiquement
   currentTime = millis();
   if (currentTime - startTime >= period)//si periode écoulee
   {
-    //envoi données 
+    //envoi données
     startTime = currentTime;//remise a 0 du timer
   }
-  yield(); // passe la main au bluetooth 
+  //yield(); // passe la main au bluetooth
 }//fin loop
 
 //ISR
