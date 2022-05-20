@@ -3,7 +3,7 @@
 
 char commande = 'm'; // manuel "m" , cartographie "c"
 boolean isQuit = false;
-
+int evitmentUrgence ;
 void initBluetooth(void) {
   // Ouvre la voie série avec le module BT
   Serial1.begin(9600);//19 RX, 18 TX
@@ -25,10 +25,14 @@ boolean ecouterBluetooth(Servo d, Servo g, boolean _CartographieActive) {
     Serial.println("Mode manuel !");
     _CartographieActive = false ;
     while ( !_CartographieActive ) {
+       evitmentUrgence = digitalRead(2);
       if (Serial1.available()) {
         commande = Serial1.read();
       }
-
+      if(evitmentUrgence == FALLING){
+        Serial.println("STOPUUUUUUU !");
+        arretTotal(d, g, 500);
+      }
       switch (commande) {
         case 'z':
           // avancer
@@ -40,7 +44,7 @@ boolean ecouterBluetooth(Servo d, Servo g, boolean _CartographieActive) {
           // arreter
           arretTotal(d, g, 500);
           //reculer(d, g);
-          Serial.println("reculer");
+          Serial.println("arreter");
           break;
         case 'q':
           // tourner à gauche
