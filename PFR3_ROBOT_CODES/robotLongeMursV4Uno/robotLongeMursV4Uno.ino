@@ -16,6 +16,7 @@ float c1distance = 100;  //on met par défaut une valeur non critique pour ne pa
 float c2distance = 100;  //dans un if dès la mise en marche du robot
 float c3distance = 30;
 int diffLaterale = 0;
+
 volatile bool listenFinPlusDeMur = false;
 
 //ISR
@@ -72,7 +73,8 @@ void loop() {
     delay(50);
     digitalWrite(obstaclePin, HIGH);//prépare le prochain passage à LOW (déclenche interruption)
   }
-  else if ((c1distance < 50 && c2distance < 50) && listenFinPlusDeMur) {
+  //indique a la DUE que le robot est a nouveau pres d'un mur
+  else if ((c2distance < 50 && c3distance < 50) && listenFinPlusDeMur) {
     digitalWrite(finPlusDeMurPin, LOW);
     delay(50);
     digitalWrite(finPlusDeMurPin, HIGH);
@@ -89,7 +91,7 @@ void loop() {
 
   //declenche "redresseDroit" dans le programme de la DUE
   //diffLaterale < 15 pour la même raison
-  else if ((diffLaterale < 0 && diffLaterale < 5) || ((c2distance < 25 || c3distance < 25) && (c2distance < 70 &&  c3distance < 70))) { //si négatif, alors robot trop vers la gauche
+  else if ((diffLaterale < 0 && diffLaterale < 5) || ((c2distance < 30 || c3distance < 30) && (c2distance < 70 &&  c3distance < 70))) { //si négatif, alors robot trop vers la gauche
     digitalWrite(redresseDPin, LOW);
     delay(50);
     digitalWrite(redresseDPin, HIGH);
@@ -97,7 +99,7 @@ void loop() {
   }
 
   //si "plus de mur à gauche" alors tourne de 90° à gauche
-  else if ((c2distance >= 40 && c3distance >= 40) && !listenFinPlusDeMur) {
+  if ((c2distance >= 40 && c3distance >= 40) && !listenFinPlusDeMur) {
     digitalWrite(plusDeMurPin, LOW);
     delay(50);
     digitalWrite(plusDeMurPin, HIGH);

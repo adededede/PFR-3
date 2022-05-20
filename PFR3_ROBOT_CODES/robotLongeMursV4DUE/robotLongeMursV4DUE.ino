@@ -25,7 +25,7 @@ volatile bool isEvitementObstacle = false;//volatile car ces variables peuvent e
 volatile bool isPlusDeMur = false;
 volatile bool isRedresseDroit = false;
 volatile bool isRedresseGauche = false;
-volatile bool finDeMur = true;
+volatile bool isFinPlusDeMur = true;
 
 unsigned long startTime;
 unsigned long currentTime;
@@ -48,7 +48,7 @@ void redresseGauche(void) {
   isRedresseGauche = true;
 }
 void finPlusDeMur(void) {
-  finDeMur = true;
+  isFinPlusDeMur = true;
 }
 
 void setup()
@@ -58,15 +58,13 @@ void setup()
   //initialisation de la communication avec le moniteur série
   Serial.begin(9600);
   initBluetooth();
-  initEncodeurs() ;
+  //initEncodeurs() ;
   //servo.attach() positionne moteurs à la derniere valeur utilisee via servo.write();
   sg.write(1500);//positionne les roues à l'arret
   sd.write(1500);
-  sg.attach(9);//  paire droite
+  sg.attach(9);  //  paire droite
   sd.attach(10); // paire gauche (oui il y a inversion)
 
-  //pin utilisee pour le bip
-  pinMode(bipPin, OUTPUT);
   //déclaration des pins qui lisent les déclenchement d'interruptions
   pinMode(2, INPUT_PULLUP);//INUPUT_PULLUP ; utilisation résistance interne
   pinMode(3, INPUT_PULLUP);
@@ -86,10 +84,7 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(6), finPlusDeMur, FALLING);
 
   //faire 3 bips pour annoncer départ du robot
-  bipInitialisation();
-
-  //on fait avancer le robot tout droit
-  //avancer(sd, sg, 1580);
+  //bipInitialisation();
 
   //Scheduler.startLoop(loopBluetooth);
 
@@ -98,10 +93,8 @@ void setup()
 void loop() {
 
   CartographieActive = ecouterBluetooth(sg, sd, CartographieActive);
-  Serial.println(CartographieActive);
 
   if (CartographieActive) {
-
 
     if (isEvitementObstacle) {
       //arret
@@ -118,6 +111,7 @@ void loop() {
 
     else if (isPlusDeMur) { //fonctionne si au moins un des deux capteurs voit le mur
       //arret
+      delay(500);
       arretTotal(sg, sd, 500);
       //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
       envoyerEtat(TOURNER_GAUCHE);
@@ -136,40 +130,27 @@ void loop() {
       //on prépare la prochaine interruption en cas d'abscence de mur
       isPlusDeMur = false;
     }
-    else if (finDeMur) {
-      attachInterrupt(digitalPinToInterrupt(3), plusDeMur,  FALLING);
-      finDeMur = false;
-    }
 
-    if (isRedresseDroit) {
+    else if (isRedresseDroit) {
       sd.writeMicroseconds(1650);
-      delay(70);
+      delay(90);
       sd.writeMicroseconds(1580);
       //on prépare la prochaine interruption en cas de redressage à droite
       isRedresseDroit = false;
     }
 
-    if (isRedresseGauche) {
+    else if (isRedresseGauche) {
       sg.writeMicroseconds(1650);
       delay(100);
       sg.writeMicroseconds(1580);
       //on prépare la prochaine interruption en cas de redressage à gauche
       isRedresseGauche = false;
     }
-    /*
-       SUPPRIMER LES DELAY POUR QUE L'ENVOI SOIT PRECIS EN PERIODE
-    */
-    //envoi de données périodiquement
-    currentTime = millis();
-    if (currentTime - startTime >= period)//si periode écoulee
-    {
-      //envoi données
-      startTime = currentTime;//remise a 0 du timer
+
+    if (isFinPlusDeMur) {
+      attachInterrupt(digitalPinToInterrupt(3), plusDeMur,  FALLING);
+      isFinPlusDeMur = false;
     }
-    //yield(); // passe la main au bluetooth
   }
-
-
-
 
 }//fin loop
