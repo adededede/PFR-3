@@ -49,11 +49,11 @@ boolean ecouterBluetooth(Servo d, Servo g, boolean _CartographieActive) {
         case 'q':
           // tourner à gauche
           Serial.println(" tourner à gauche");
-          tournerGauche_90_BT( g,  d);
+          tournerGauche90( g,  d);
           break;
         case 'd':
           // tourner a droite
-          tournerDroite_90_BT( g,  d);
+          tournerDroite90( g,  d);
           Serial.println("  tourner a droite");
           break;
         case 'c':

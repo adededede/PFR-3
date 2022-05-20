@@ -1,5 +1,7 @@
 #include "fonctions_robot.h"
 
+const int bipPin = 8;
+
 void affichageDansLeTerminal(float c1distance, float c2distance, float c3distance) {
   Serial.print("capteur 1 distance :");
   Serial.print(c1distance);

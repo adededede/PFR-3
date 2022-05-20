@@ -5,14 +5,20 @@
 /* PLACER LE ROBOT A 20 CM D'UN MUR A LA GAUCHE DU ROBOT         */
 /*---------------------------------------------------------------*/
 
+/* ROLE DE LA DUE : INTERPRETER LES MESSAGES DE LA UNO ET EFFECTUER
+    LES ACTIONS NECESSAIRES + COMMUNICATION VIA BLUETOOTH POUR LE
+    MODE MANUEL ET LA CARTOGRAPHIE (AUTOMATIQUE)*/
+
 #include "fonctions_robot.h"
 #include "fonctions_Moteurs.h"
 #include "bluetooth.h"
 #include <Scheduler.h>
 
+//commandes envoyees via bluetooth pour commande mode manuel
 #define AVANCER 'z'
 #define TOURNER_GAUCHE 'q'
 #define TOURNER_DROIT 'd'
+
 //déclare sd et sg de type Servo
 Servo sg, sd;
 
@@ -21,18 +27,16 @@ float c1distance = 100;//on met par défaut une valeur non critique pour ne pas 
 float c2distance = 100;//dans un if dès la mise en marche du robot
 float c3distance = 30;
 
-volatile bool isEvitementObstacle = false;//volatile car ces variables peuvent etre modifiees par une ISR(interrupt service routine)
+volatile bool isEvitementObstacle = false;//volatile car ces variables peuvent etre modifiees par une ISR(Interrupt Service Routine)
 volatile bool isPlusDeMur = false;
 volatile bool isRedresseDroit = false;
 volatile bool isRedresseGauche = false;
 volatile bool isFinPlusDeMur = true;
+volatile boolean CartographieActive = false;
 
 unsigned long startTime;
 unsigned long currentTime;
 const unsigned long period = 1000;
-volatile boolean CartographieActive = false;
-
-
 
 //ISR
 void evitementObstacle(void) {
@@ -92,46 +96,60 @@ void setup()
 
 void loop() {
 
+  //à l'allumage du robot, on force le mode manuel (CartographieActive = false)
+  //on écoute le bluetooth en permanence pour attendre qu'il nous dise de passer en
+  //mode cartographie automatique (CartographieActive = true)
   CartographieActive = ecouterBluetooth(sg, sd, CartographieActive);
 
   if (CartographieActive) {
 
+    //si détecte un mur ou un obstacle
     if (isEvitementObstacle) {
       //arret
       arretTotal(sg, sd, 500);
-      //tourne à droite pour éviter obstacle (tourne à 90° a droite)
+      //indique via bluetooth que le robot s'est arrete et qu'il tourne
       envoyerEtat(TOURNER_DROIT);
-      tournerDroite_90_BT( sd,  sg);
-      //on remet le robot droit en marche avant
+      //tourne à droite pour éviter obstacle (tourne à 90° a droite)
+      tournerDroite90(sd, sg);
+      //indique via bluetooth que le robot se remet à avance
       envoyerEtat(AVANCER);
+      //on remet le robot droit en marche avant
       avancer(sg, sd, 1580);
       //on prépare la prochaine interruption en cas de d'obstacle
       isEvitementObstacle = false;
     }
 
-    else if (isPlusDeMur) { //fonctionne si au moins un des deux capteurs voit le mur
-      //arret
+    //si detecte une absence de mur a gauche (quand distance mesuree > 40 cm a gauche du robot)
+    else if (isPlusDeMur) {
+      //delai de 0.5s pour eviter qu'apres avoir tourne le robot ne se retrouve trop
+      //colle au mur a sa gauche
       delay(500);
+      //arret
       arretTotal(sg, sd, 500);
-      //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
+      //indique via bluetooth que le robot s'est arrete et qu'il tourne
       envoyerEtat(TOURNER_GAUCHE);
-      tournerGauche_90_BT( sd,  sg);
-      //on enleve interruption plus de mur le temps que le robot reviennent pres du mur
+      //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
+      tournerGauche90( sd,  sg);
+      //on enleve interruption plus de mur le temps que le robot revienne pres du mur
       //apres avoir tourne a gauche
       detachInterrupt(digitalPinToInterrupt(3));
-      //previent la UNO qu'il doit scruter la fin de plus de mur
+      //previent la UNO qu'il faut scruter la fin d'une absencce de mur
+      //la UNO enverra un message pour prevenir que le robot est de nouveau pres du mur
       digitalWrite(13, LOW);
       delay(50);
       digitalWrite(13, HIGH);
       delay(500);
-      //on remet le robot droit en marche avant
+      //indique via bluetooth que le robot se remet à avance
       envoyerEtat(AVANCER);
+      //on remet le robot droit en marche avant
       avancer(sg, sd, 1580);
       //on prépare la prochaine interruption en cas d'abscence de mur
       isPlusDeMur = false;
     }
 
+    //si le robot est trop près du mur ou alors pas parallele (orienté vers la gauche)
     else if (isRedresseDroit) {
+      //décale le robot sur la droite et le remet parallele au mur
       sd.writeMicroseconds(1650);
       delay(90);
       sd.writeMicroseconds(1580);
@@ -139,7 +157,9 @@ void loop() {
       isRedresseDroit = false;
     }
 
+    //si le robot est trop loin du mur ou alors pas parallele (orienté vers la droite)
     else if (isRedresseGauche) {
+      //décale le robot sur la gauche et le remet parallele au mur
       sg.writeMicroseconds(1650);
       delay(100);
       sg.writeMicroseconds(1580);
@@ -147,10 +167,13 @@ void loop() {
       isRedresseGauche = false;
     }
 
+    //si le robot est a nouveau pres du mur
     if (isFinPlusDeMur) {
+      //on reactive l'interruption "plusDeMur"
       attachInterrupt(digitalPinToInterrupt(3), plusDeMur,  FALLING);
       isFinPlusDeMur = false;
     }
-  }
+
+  }//fin if(CartographieActive)
 
 }//fin loop

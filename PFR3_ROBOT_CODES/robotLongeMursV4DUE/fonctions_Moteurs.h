@@ -7,21 +7,18 @@ void initEncodeurs(void);
 
 void readEncodeurGauche(void);
 void readEncodeurDroit(void);
+
 void arretTotal(Servo rouesGauches, Servo RouesDroites);
 void StopPaireDeRoue(Servo paireDeRoue);
 void arretTotal(Servo rouesGauches, Servo RouesDroites, int delai);
 
-void tournerGauche(Servo rouesGauches, Servo rouesDroites);
-void tournerDroite(Servo rouesDroites, Servo rouesGauches);
-
 void avancer(Servo rouesDroites, Servo rouesGauches, int millisecondes);
 void reculer (Servo rouesDroites, Servo rouesGauches);
 
-void tournerGauche_90_BT(Servo rouesGauches, Servo rouesDroites);
+void tournerGauche90(Servo rouesGauches, Servo rouesDroites);
+void tournerDroite90(Servo rouesGauches, Servo rouesDroites);
 
- void tournerDroite_90_BT(Servo rouesGauches, Servo rouesDroites);
+void tournerGauche_petit_BT(Servo rouesGauches, Servo rouesDroites);
+void tournerDroite_petit_BT(Servo rouesGauches, Servo rouesDroites);
 
- void tournerGauche_petit_BT(Servo rouesGauches, Servo rouesDroites);
-
-  void tournerDroite_petit_BT(Servo rouesGauches, Servo rouesDroites);
 #endif
