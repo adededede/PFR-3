@@ -161,7 +161,7 @@ void loop() {
     else if (isRedresseGauche) {
       //décale le robot sur la gauche et le remet parallele au mur
       sg.writeMicroseconds(1650);
-      delay(100);
+      delay(130);
       sg.writeMicroseconds(1580);
       //on prépare la prochaine interruption en cas de redressage à gauche
       isRedresseGauche = false;

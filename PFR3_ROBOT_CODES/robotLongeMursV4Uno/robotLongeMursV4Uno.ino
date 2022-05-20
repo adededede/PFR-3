@@ -73,7 +73,7 @@ void loop() {
     digitalWrite(obstaclePin, HIGH);//prépare le prochain passage à LOW (déclenche interruption)
   }
   //indique a la DUE que le robot est a nouveau pres d'un mur
-  else if ((c2distance < 50 && c3distance < 50) && listenFinPlusDeMur) {
+  else if ((c2distance < 60 && c3distance < 60) && listenFinPlusDeMur) {
     digitalWrite(finPlusDeMurPin, LOW);
     delay(50);
     digitalWrite(finPlusDeMurPin, HIGH);
@@ -81,7 +81,7 @@ void loop() {
   }
   //declenche "redresseGauche" dans le programme de la DUE
   //diffLaterale < 5 pour éviter le cas où un seul capteur voit le mur après interruption "plusDeMur" dans le programme DUE
-  else if ((diffLaterale > 0 && diffLaterale < 5) || ((c2distance > 35 || c3distance > 35) && (c2distance < 70 &&  c3distance < 70))) { //si positif, alors robot trop vers la droite
+  else if ((diffLaterale > 0 && diffLaterale < 5) || ((c2distance > 45 || c3distance > 45) && (c2distance < 70 &&  c3distance < 70)))  { //si positif, alors robot trop vers la droite
     digitalWrite(redresseGPin, LOW);
     delay(50);
     digitalWrite(redresseGPin, HIGH);
@@ -89,14 +89,14 @@ void loop() {
   }
   //declenche "redresseDroit" dans le programme de la DUE
   //diffLaterale < 5 pour la même raison
-  else if ((diffLaterale < 0 && diffLaterale < 5) || ((c2distance < 30 || c3distance < 30) && (c2distance < 70 &&  c3distance < 70))) { //si négatif, alors robot trop vers la gauche
+  else if ((diffLaterale < 0 && diffLaterale < 5) || ((c2distance < 50 || c3distance < 50) && (c2distance < 70 &&  c3distance < 70))) { //si négatif, alors robot trop vers la gauche
     digitalWrite(redresseDPin, LOW);
     delay(50);
     digitalWrite(redresseDPin, HIGH);
     //Serial.println("redresse droit");
   }
   //si "plus de mur à gauche" alors tourne de 90° à gauche
-  if ((c2distance >= 40 && c3distance >= 40) && !listenFinPlusDeMur) {
+  if ((c2distance >= 60 && c3distance >= 60) && !listenFinPlusDeMur) {
     digitalWrite(plusDeMurPin, LOW);
     delay(50);
     digitalWrite(plusDeMurPin, HIGH);
