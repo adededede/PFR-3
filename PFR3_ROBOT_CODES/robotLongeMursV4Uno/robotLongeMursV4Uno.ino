@@ -37,11 +37,11 @@ void setup() {
   pinMode(redresseDPin, OUTPUT);
   pinMode(redresseGPin, OUTPUT);
   pinMode(finPlusDeMurPin, OUTPUT);
-  
+
   pinMode(interruptFromDUE, INPUT_PULLUP);
 
 
-  //met les pins qui déclenchent interruptions sur la DUE à HIGH 
+  //met les pins qui déclenchent interruptions sur la DUE à HIGH
   //car ils déclenchent interuptions sur la DUE en passant de HIGH à LOW (falling)
   digitalWrite(obstaclePin, HIGH);
   digitalWrite(plusDeMurPin, HIGH);
