@@ -2,7 +2,7 @@
 /*--------------------------ROBOT ARDUINO------------------------*/
 /*---------------------------------------------------------------*/
 /* AVANT LA MISE EN MARCHE                                       */
-/* PLACER LE ROBOT PRET D'UN MUR A LA GAUCHE DU ROBOT            */
+/* PLACER LE ROBOT A 20 CM D'UN MUR A LA GAUCHE DU ROBOT         */
 /*---------------------------------------------------------------*/
 
 #include "fonctions_robot.h"
@@ -25,11 +25,31 @@ volatile bool isEvitementObstacle = false;//volatile car ces variables peuvent e
 volatile bool isPlusDeMur = false;
 volatile bool isRedresseDroit = false;
 volatile bool isRedresseGauche = false;
+volatile bool finDeMur = true;
 
 unsigned long startTime;
 unsigned long currentTime;
 const unsigned long period = 1000;
 volatile boolean CartographieActive = false;
+
+
+
+//ISR
+void evitementObstacle(void) {
+  isEvitementObstacle = true;
+}
+void plusDeMur(void) {
+  isPlusDeMur = true;
+}
+void redresseDroit(void) {
+  isRedresseDroit = true;
+}
+void redresseGauche(void) {
+  isRedresseGauche = true;
+}
+void finPlusDeMur(void) {
+  finDeMur = true;
+}
 
 void setup()
 {
@@ -52,12 +72,18 @@ void setup()
   pinMode(3, INPUT_PULLUP);
   pinMode(4, INPUT_PULLUP);
   pinMode(5, INPUT_PULLUP);
+  pinMode(6, INPUT_PULLUP);
+  //pin qui déclenchent les interruptions chez la UNO
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH); //déclenche interruption en passant à LOW
+
 
   //déclaration des interruptions
   attachInterrupt(digitalPinToInterrupt(2), evitementObstacle, FALLING);//quand pin 2 passe de HIGH à LOW execute l'ISR arretUrgence
   attachInterrupt(digitalPinToInterrupt(3), plusDeMur,  FALLING);
   attachInterrupt(digitalPinToInterrupt(4), redresseDroit, FALLING);
   attachInterrupt(digitalPinToInterrupt(5), redresseGauche, FALLING);
+  attachInterrupt(digitalPinToInterrupt(6), finPlusDeMur, FALLING);
 
   //faire 3 bips pour annoncer départ du robot
   bipInitialisation();
@@ -82,7 +108,7 @@ void loop() {
       arretTotal(sg, sd, 500);
       //tourne à droite pour éviter obstacle (tourne à 90° a droite)
       envoyerEtat(TOURNER_DROIT);
-      tournerDroite(sg, sd);
+      tournerDroite_90_BT( sd,  sg);
       //on remet le robot droit en marche avant
       envoyerEtat(AVANCER);
       avancer(sg, sd, 1580);
@@ -95,13 +121,24 @@ void loop() {
       arretTotal(sg, sd, 500);
       //tourne à gauche pour relonger le du mur (tourne à 90° a gauche)
       envoyerEtat(TOURNER_GAUCHE);
-      tournerGauche(sd, sg);
+      tournerGauche_90_BT( sd,  sg);
+      //on enleve interruption plus de mur le temps que le robot reviennent pres du mur
+      //apres avoir tourne a gauche
+      detachInterrupt(digitalPinToInterrupt(3));
+      //previent la UNO qu'il doit scruter la fin de plus de mur
+      digitalWrite(13, LOW);
+      delay(50);
+      digitalWrite(13, HIGH);
+      delay(500);
       //on remet le robot droit en marche avant
       envoyerEtat(AVANCER);
       avancer(sg, sd, 1580);
-      delay(2000);
       //on prépare la prochaine interruption en cas d'abscence de mur
       isPlusDeMur = false;
+    }
+    else if (finDeMur) {
+      attachInterrupt(digitalPinToInterrupt(3), plusDeMur,  FALLING);
+      finDeMur = false;
     }
 
     if (isRedresseDroit) {
@@ -136,17 +173,3 @@ void loop() {
 
 
 }//fin loop
-
-//ISR
-void evitementObstacle(void) {
-  isEvitementObstacle = true;
-}
-void plusDeMur(void) {
-  isPlusDeMur = true;
-}
-void redresseDroit(void) {
-  isRedresseDroit = true;
-}
-void redresseGauche(void) {
-  isRedresseGauche = true;
-}

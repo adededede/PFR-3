@@ -2,16 +2,14 @@
 /*--------------------------ROBOT ARDUINO------------------------*/
 /*---------------------------------------------------------------*/
 /* AVANT LA MISE EN MARCHE                                       */
-/* PLACER LE ROBOT PRET D'UN MUR A LA GAUCHE DU ROBOT            */
+/* PLACER LE ROBOT A 20 CM D'UN MUR A LA GAUCHE DU ROBOT         */
 /*---------------------------------------------------------------*/
 
 /*ROLE DE LA CARTE UNO : MESURER CONTINUELLEMENT VIA LES 3 CAPTEURS
    ET NE COMMUNIQUER AVEC LA CARTE DUE QUE QUAND UNE DISTANCE
    CRITIQUE EST MESUREE
 */
-/*
-   FAIRE UN SYSTEME DE SITRIBUTION DE PAROLE POUR NE PAS ENVOYER PLUSIEURS INTERRUPTIONS A LA FOIS
-*/
+
 #include "fonctions_robot.h"
 
 float c1distance = 100;  //on met par défaut une valeur non critique pour ne pas entrer
@@ -20,19 +18,13 @@ float c3distance = 30;
 int diffLaterale = 0;
 volatile bool listenFinPlusDeMur = false;
 
-const int obstaclePin = 9;
-const int plusDeMurPin = 10;
-const int redresseDPin = 11;
-const int redresseGPin = 12;
-const int finPlusDeMurPin = 13;
-
+//ISR
 void listenFinPlusDeMurISR(void) {
   listenFinPlusDeMur = true;
 }
 
 void setup() {
-  Serial.begin(9600);
-
+  //déclaration des modes des  pins utilisés
   pinMode(c1TrigPin, OUTPUT);
   pinMode(c1EchoPin, INPUT);
   pinMode(c2TrigPin, OUTPUT);
@@ -45,53 +37,40 @@ void setup() {
   pinMode(redresseDPin, OUTPUT);
   pinMode(redresseGPin, OUTPUT);
   pinMode(finPlusDeMurPin, OUTPUT);
-  pinMode(2, INPUT_PULLUP);
+  
+  pinMode(interruptFromDUE, INPUT_PULLUP);
 
 
-  //met les pins à HIGH car ils déclenchent interuptions sur la DUE à leur passage à LOW
+  //met les pins qui déclenchent interruptions sur la DUE à HIGH 
+  //car ils déclenchent interuptions sur la DUE en passant de HIGH à LOW (falling)
   digitalWrite(obstaclePin, HIGH);
   digitalWrite(plusDeMurPin, HIGH);
   digitalWrite(redresseDPin, HIGH);
   digitalWrite(redresseGPin, HIGH);
   digitalWrite(finPlusDeMurPin, HIGH);
 
-  //declaration interuption
-  attachInterrupt(digitalPinToInterrupt(2), listenFinPlusDeMurISR, FALLING);
-
-  /*
-    //calcul temps de mesure capteurs (SANS CAPTEURS)
-    long int t1 = millis();
-    c1distance = lectureCapteurAvant();//693
-    //c2distance = lectureCapteurAvantGauche();//693ms
-    //c3distance = lectureCapteurLateral();//693
-    long int t2 = millis();
-    Serial.print("Time taken by the task: ");
-    Serial.print(t2 - t1);
-    Serial.println(" milliseconds");*/
-
+  //declaration interuption déclenchée par la DUE pour dire à la UNO de ne plus envoyer
+  //le signal d'interruption "plusDeMur" tant que le robot n'est pas de retour près d'un mur
+  //la DUE prévient la UNO via cette interruption quand c'est bon
+  attachInterrupt(digitalPinToInterrupt(interruptFromDUE), listenFinPlusDeMurISR, FALLING);
 
 }  //fin setup
 void loop() {
 
   //on déclenche les capteurs et on lit leurs valeurs en continu
   //tant qu'aucun capteur ne détecte une distance critique
-  /*
-     TEST sans delay entre les mesures, a voir si ça ne parasite pas les mesures
-  */
-
   c1distance = lectureCapteurAvant();
-  c2distance = lectureCapteurAvantGauche();
-  c3distance = lectureCapteurLateral();
+  c2distance = lectureCapteurLateralAvant();
+  c3distance = lectureCapteurLateralArriere();
 
+  //si différence mesuree entre capteurs latéraux alors c'est que le robot n'est pas parralele au mur
   diffLaterale = c2distance - c3distance;
 
-  //evitement d'obstacle PRIORITAIRE
-  if (c1distance < 25 && c1distance > 10 ) { //pour eviter les valeurs extremes en cas de non detection de mur
-    Serial.println("obstacle");
-    digitalWrite(obstaclePin, LOW);//déclenche une interruption sur le programme principal de la DUE
+  //evitement d'obstacle
+  if (c1distance < 25 && c1distance > 5 ) { //pour eviter les valeurs extremes en cas de non detection de mur
+    digitalWrite(obstaclePin, LOW);//déclenche une interruption sur le programme de la DUE
     delay(50);
-    digitalWrite(obstaclePin, HIGH);//prépare le prochain passage à HIGH
-    //Serial.println("obstacle");
+    digitalWrite(obstaclePin, HIGH);//prépare le prochain passage à LOW (déclenche interruption)
   }
   else if ((c1distance < 50 && c2distance < 50) && listenFinPlusDeMur) {
     digitalWrite(finPlusDeMurPin, LOW);
