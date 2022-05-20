@@ -5,10 +5,9 @@
 /* PLACER LE ROBOT A 20 CM D'UN MUR A LA GAUCHE DU ROBOT         */
 /*---------------------------------------------------------------*/
 
-/*ROLE DE LA CARTE UNO : MESURER CONTINUELLEMENT VIA LES 3 CAPTEURS
+/* ROLE DE LA CARTE UNO : MESURER CONTINUELLEMENT VIA LES 3 CAPTEURS
    ET NE COMMUNIQUER AVEC LA CARTE DUE QUE QUAND UNE DISTANCE
-   CRITIQUE EST MESUREE
-*/
+   CRITIQUE EST MESUREE */
 
 #include "fonctions_robot.h"
 
@@ -81,23 +80,21 @@ void loop() {
     listenFinPlusDeMur = false;
   }
   //declenche "redresseGauche" dans le programme de la DUE
-  //diffLaterale < 15 pour éviter le cas où un seul capteur voit le mur après interruption "plusDeMur" dans le programme DUE
+  //diffLaterale < 5 pour éviter le cas où un seul capteur voit le mur après interruption "plusDeMur" dans le programme DUE
   else if ((diffLaterale > 0 && diffLaterale < 5) || ((c2distance > 35 || c3distance > 35) && (c2distance < 70 &&  c3distance < 70))) { //si positif, alors robot trop vers la droite
     digitalWrite(redresseGPin, LOW);
     delay(50);
     digitalWrite(redresseGPin, HIGH);
     //Serial.println("redresse gauche");
   }
-
   //declenche "redresseDroit" dans le programme de la DUE
-  //diffLaterale < 15 pour la même raison
+  //diffLaterale < 5 pour la même raison
   else if ((diffLaterale < 0 && diffLaterale < 5) || ((c2distance < 30 || c3distance < 30) && (c2distance < 70 &&  c3distance < 70))) { //si négatif, alors robot trop vers la gauche
     digitalWrite(redresseDPin, LOW);
     delay(50);
     digitalWrite(redresseDPin, HIGH);
     //Serial.println("redresse droit");
   }
-
   //si "plus de mur à gauche" alors tourne de 90° à gauche
   if ((c2distance >= 40 && c3distance >= 40) && !listenFinPlusDeMur) {
     digitalWrite(plusDeMurPin, LOW);
