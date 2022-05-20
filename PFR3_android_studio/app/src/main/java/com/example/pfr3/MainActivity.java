@@ -25,6 +25,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     boolean clicAutomatique = true;
     String dernierFragement;
     int dessin = 0;
-    float x_depart,x_arrive,y_depart,y_arrive = 0;
+    float x_depart = 0,x_arrive = 0,y_depart = 0,y_arrive = 0;
     String direction = "y+";
     Bitmap b;
 
@@ -480,20 +481,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void dessiner(Character c){
         //DESSINER SUR IMAGE
-        b = Bitmap.createBitmap(cartographie.getWidth(),cartographie.getHeight(),Bitmap.Config.RGB_565);
         if(dessin==0){
-            //b = Bitmap.createBitmap(cartographie.getWidth(),cartographie.getHeight(),Bitmap.Config.RGB_565);
+            b = Bitmap.createBitmap(cartographie.getWidth(),cartographie.getHeight(),Bitmap.Config.ARGB_8888);
             date_cartographie = LocalDateTime.now();
-        }/*
+        }
         else{
             //je ne peux pas convertir drawable to bitmap
-            //android.graphics.drawable.ColorDrawable cannot be cast to android.graphics.drawable.BitmapDrawable
-            b = ((BitmapDrawable)cartographie.getDrawable()).getBitmap();
-        }*/
+            Drawable img = cartographie.getDrawable();
+            b = ((BitmapDrawable)img).getBitmap();
+        }
         Canvas tempCanvas = new Canvas(b);
         LocalDateTime date_courante;
         Paint peinture = new Paint();
         peinture.setColor(Color.BLACK);
+        peinture.setStyle(Paint.Style.STROKE);
+        peinture.setStrokeWidth(5);
         //63dp = 1cm (environ) sachant que l'on prend comme echelle 1cm sur l'écran = 250cm dans la réalité
         //vu qu'on parcours environ 50cm par seconde
         //en 1 sec  il parcours 50 cm soit 12.6dp
@@ -505,7 +507,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if(dessin==0){
                 //on définit la position de départ
                 x_depart=(cartographie.getWidth()/2);
-                y_depart=cartographie.getHeight()-10;
+                y_depart=cartographie.getHeight();
             }
             else{
                 x_depart=x_arrive;
@@ -543,6 +545,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             //on dessine une droite vers la gauche
             tempCanvas.drawLine(x_depart,y_depart,x_arrive,y_arrive,peinture);
+            cartographie.setImageBitmap(b);
         }
         //si on recupère d, pour avancer droite
         else if(c.equals('d')||c.equals('D')){
@@ -575,6 +578,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             //on dessine une droite vers la gauche
             tempCanvas.drawLine(x_depart,y_depart,x_arrive,y_arrive,peinture);
+            cartographie.setImageBitmap(b);
         }
         dessin++;
     }
