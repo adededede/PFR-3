@@ -34,6 +34,7 @@ import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -57,9 +58,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     String dernierFragement;
     int dessin = 0;
     float x_depart = 0,x_arrive = 0,y_depart = 0,y_arrive = 0;
-    String direction = "y+";
+    String direction = "y-";
+
     Bitmap b;
-    int compteur_erreur_depart=0;
+    int compteur_erreur_depart=3;
 
     //Données qu'on prend du design
     ImageView cartographie;
@@ -181,7 +183,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 else{
                     //on envois c pour lancer le cartographie
                     if(thread_connecte!=null){
-                        thread_connecte.write('c');
+                        if(btnHaut.getVisibility()!=View.VISIBLE){
+                            thread_connecte.write('c');
+                        }
+                        else{
+                            //on est en mode manuel
+                            thread_connecte.write('m');
+                        }
                     }
                     else{
                         //erreur
@@ -195,9 +203,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnRecommencer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                clicCommencer=!clicCommencer;
                 if(clicCommencer==false){
                     btnCommencer.setBackgroundResource(R.mipmap.ic_pause);
+                    clicCommencer=!clicCommencer;
                     //on vide l'image
                     cartographie.setImageBitmap(null);
                     //on relance la cartographie
@@ -211,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 else{
                     btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
+                    clicCommencer=!clicCommencer;
                     btnArreter.setVisibility(View.GONE);
                     btnRecommencer.setVisibility(View.GONE);
                 }
@@ -219,12 +228,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnArreter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                clicCommencer=!clicCommencer;
                 if(clicCommencer==false){
                     btnCommencer.setBackgroundResource(R.mipmap.ic_pause);
+                    clicCommencer=!clicCommencer;
                 }
                 else{
                     btnCommencer.setBackgroundResource(R.mipmap.ic_commencer);
+                    clicCommencer=!clicCommencer;
                     dessin = 0;
                     //j'envois m pour passer en mode manunel et stopper la cartographie
                     if(thread_connecte!=null){
@@ -243,6 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if(thread_connecte!=null){
                     //Toast.makeText(getApplicationContext(),"DROITE",Toast.LENGTH_SHORT).show();
                     thread_connecte.write('d');
+                    dessiner('d');
                 }
             }
         });
@@ -253,6 +264,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if(thread_connecte!=null){
                     //Toast.makeText(getApplicationContext(),"GAUCHE",Toast.LENGTH_SHORT).show();
                     thread_connecte.write('q');
+                    dessiner('q');
                 }
             }
         });
@@ -263,6 +275,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if(thread_connecte!=null){
                     //Toast.makeText(getApplicationContext(),"AVANT",Toast.LENGTH_SHORT).show();
                     thread_connecte.write('z');
+                    dessiner('z');
                 }
             }
         });
@@ -302,20 +315,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             thread_connexion.start();
         }
     }
-
-    private void setState(CharSequence c){
-        Toast.makeText(this,c,Toast.LENGTH_SHORT).show();
-    }
-
-    public static UUID getDeviceId(Context context) {
-        final String tmSerial, androidId;
-        //num IMEI de mon tel : 861758043102178
-        tmSerial = "861758043102178";
-        androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-        UUID deviceUuid = new UUID(androidId.hashCode(),  tmSerial.hashCode());
-        return deviceUuid;
-    }
-
 
     private void connexionBluetooth(){;
         if(bluetoothManager.getAdapter() == null){
@@ -484,6 +483,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             compteur_erreur_depart++;
         }
         else{
+            //le repère est a lenvers sur une image!! le y+ est vers le bas et le y- vers le haut (visuellement)
             //DESSINER SUR IMAGE
             if(dessin==0){
                 date_cartographie = LocalDateTime.now();
@@ -509,8 +509,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 date_cartographie = LocalDateTime.now();
                 if(dessin==0){
                     //on définit la position de départ
-                    x_depart=(cartographie.getWidth()/2);
-                    y_depart=cartographie.getHeight();
+                    x_depart=(cartographie.getWidth())/2;
+                    y_depart=(cartographie.getHeight())/2;
                 }
                 else{
                     x_depart=x_arrive;
@@ -527,23 +527,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         //se déplace sur l'axe des x vers les positif
                         x_arrive=(float)12.6*temps_ecoule+x_depart;
                         y_arrive=y_depart;
-                        direction="y+";
+                        direction="y-";
                         break;
                     case "x-":
                         //se déplace sur l'axe des x vers les positif
                         x_arrive=x_depart-(float)12.6*temps_ecoule;
                         y_arrive=y_depart;
-                        direction="y-";
+                        direction="y+";
                         break;
                     case "y+":
                         x_arrive=x_depart;
-                        y_arrive=(float)12.6*temps_ecoule+y_depart;
-                        direction="x-";
+                        y_arrive=y_depart+(float)12.6*temps_ecoule;
+                        direction="x+";
                         break;
                     case "y-":
                         x_arrive=x_depart;
                         y_arrive=y_depart-(float)12.6*temps_ecoule;
-                        direction="x+";
+                        direction="x-";
                         break;
                 }
                 //on dessine une droite vers la gauche
@@ -560,23 +560,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         //se déplace sur l'axe des x vers les positif
                         x_arrive=(float)12.6*temps_ecoule+x_depart;
                         y_arrive=y_depart;
-                        direction="y-";
+                        direction="y+";
                         break;
                     case "x-":
                         //se déplace sur l'axe des x vers les positif
                         x_arrive=x_depart-(float)12.6*temps_ecoule;
                         y_arrive=y_depart;
-                        direction="y+";
+                        direction="y-";
                         break;
                     case "y+":
                         x_arrive=x_depart;
-                        y_arrive=(float)12.6*temps_ecoule+y_depart;
-                        direction="x+";
+                        y_arrive=y_depart+(float)12.6*temps_ecoule;
+                        direction="x-";
                         break;
                     case "y-":
                         x_arrive=x_depart;
                         y_arrive=y_depart-(float)12.6*temps_ecoule;
-                        direction="x-";
+                        direction="x+";
                         break;
                 }
                 //on dessine une droite vers la gauche

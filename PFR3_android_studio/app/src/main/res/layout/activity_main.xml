@@ -143,9 +143,8 @@
 
         <ImageView
             android:id="@+id/view_cartographie"
-            android:layout_width="373dp"
+            android:layout_width="match_parent"
             android:layout_height="232dp"
-            android:layout_marginStart="20dp"
             android:layout_marginTop="10dp"
             app:srcCompat="@drawable/fond_blanc_svg" />
 
@@ -187,7 +186,7 @@
             android:layout_height="54dp"
             android:layout_marginTop="20dp"
             android:layout_gravity="center"
-            android:background="@mipmap/ic_up_arrow" />
+            android:background="@drawable/bouton_deplacement_haut" />
 
         <TableRow
             android:id="@+id/cote_a_cote"
@@ -199,19 +198,19 @@
                 android:id="@+id/btnGauche"
                 android:layout_width="61dp"
                 android:layout_height="54dp"
-                android:background="@mipmap/ic_left_arrow" />
+                android:background="@drawable/bouton_deplacement_gauche" />
 
             <Button
                 android:id="@+id/btnBas"
                 android:layout_width="61dp"
                 android:layout_height="54dp"
-                android:background="@mipmap/ic_down_arrow" />
+                android:background="@drawable/bouton_deplacement_bas" />
 
             <Button
                 android:id="@+id/btnDroit"
                 android:layout_width="61dp"
                 android:layout_height="54dp"
-                android:background="@mipmap/ic_right_arrow" />
+                android:background="@drawable/bouton_deplacement_droite" />
 
         </TableRow>
 
