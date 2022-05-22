@@ -83,14 +83,9 @@ void readEncodeurDroit(void) {
 
 
 void StopPaireDeRoue(Servo paireDeRoue) {
-  paireDeRoue.writeMicroseconds(1500);
+  paireDeRoue.writeMicroseconds(1500); // 1500 est la valeur en microsecondes pour immobilisé un moteur
 }
 
-void arretTotal(Servo rouesGauches, Servo RouesDroites) {
-  StopPaireDeRoue(rouesGauches);
-  StopPaireDeRoue(RouesDroites);
-  delay(1000);
-}
 
 void arretTotal(Servo rouesGauches, Servo RouesDroites, int delai) {
   StopPaireDeRoue(rouesGauches);
@@ -105,7 +100,7 @@ void avancer(Servo rouesDroites, Servo rouesGauches, int millisecondes) {
 }
 
 void reculer (Servo rouesDroites, Servo rouesGauches) {
-  rouesDroites.writeMicroseconds(1300);
+  rouesDroites.writeMicroseconds(1300);//en dessous de 1500 microsecondes les moteurs tournent de sorte a faire reculer le robot
   rouesGauches.writeMicroseconds(1300);
   delay(1000);
 }
@@ -113,7 +108,7 @@ void reculer (Servo rouesDroites, Servo rouesGauches) {
 
 
 void tournerGauche90(Servo rouesGauches, Servo rouesDroites) {
-  rouesDroites.writeMicroseconds(1700);
+  rouesDroites.writeMicroseconds(1700);;//au dessus  de 1500 microsecondes les moteurs tournent  de sorte a faire avancer  le robot
   rouesGauches.writeMicroseconds(1300);
   delay(480);
   arretTotal(rouesGauches, rouesDroites, 500);
