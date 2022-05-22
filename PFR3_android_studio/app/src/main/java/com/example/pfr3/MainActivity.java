@@ -59,9 +59,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     int dessin = 0;
     float x_depart = 0,x_arrive = 0,y_depart = 0,y_arrive = 0;
     String direction = "y-";
-
     Bitmap b;
-    int compteur_erreur_depart=3;
+    int compteur_erreur_depart=0;
 
     //Données qu'on prend du design
     ImageView cartographie;
@@ -131,6 +130,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnCommencer = findViewById(R.id.btnCommencer);
         btnArreter = findViewById(R.id.btnStop);
         cartographie = findViewById(R.id.view_cartographie);
+        //on enlève la bar de chargement
+        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
 
         bluetoothManager = getSystemService(BluetoothManager.class);
         handler = new Handler(Looper.getMainLooper()){
@@ -381,6 +382,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //peripheriques
             case R.id.navigation_toolbar_peripherique:
                 item.setChecked(false);
+                findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
                 affichagePeripherique();
                 break;
             //mode automatique
@@ -454,6 +456,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         devices.addAll(notPairedDevices);
         Toast.makeText(this,"nb devices : " + devices.size(),Toast.LENGTH_SHORT).show();
         FragementPeripheriques f = new FragementPeripheriques(devices);
+        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
         //lance le fragment des périphériques
         LaunchFragment(f,"FragementPeripheriques");
     }
@@ -479,10 +482,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void dessiner(Character c){
-        if(compteur_erreur_depart<3){
-            compteur_erreur_depart++;
-        }
-        else{
+        //si nous sommes en mode manuel ou que le compteur d'erreur a comptabilisé les 3 mouvements d'erreur de départ
+        //on lance le dessin
+        if((btnGauche.getVisibility()==View.VISIBLE && btnDroit.getVisibility()==View.VISIBLE && btnHaut.getVisibility()==View.VISIBLE && btnBas.getVisibility()==View.VISIBLE) || compteur_erreur_depart>=3){
             //le repère est a lenvers sur une image!! le y+ est vers le bas et le y- vers le haut (visuellement)
             //DESSINER SUR IMAGE
             if(dessin==0){
@@ -585,17 +587,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             dessin++;
         }
+        //sinon on incrémente le compteur d'erreur
+        else{
+            compteur_erreur_depart++;
+        }
     }
 
     private void affichagePeripherique() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        //si la localisation n'est pas activé on demande l'autorisation pour l'activer
         if (!isGpsEnabled) {
             startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
         }
-        //Toast.makeText(this,"AFFICHAGEPERIPHERIQUE : unpaired : "+notPairedDevices.toString(),Toast.LENGTH_SHORT).show();
+        //si le bluetooth n'est pas activé
+        if(!bluetoothManager.getAdapter().isEnabled()){
+            Toast.makeText(this,"Votre Bluetooth n'est pas activé",Toast.LENGTH_SHORT).show();
+            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+            return;
+        }
         //si le bluetooth est activé
-        if(bluetoothManager.getAdapter().isEnabled()){
+        else{
             //initialisation du set avec les devices connus
             pairedDevices = bluetoothManager.getAdapter().getBondedDevices();
             //si le discovery est activé
@@ -619,8 +631,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             break;
                     }
                 }
-                // TODO remplacer par un popup de chargement
-                //Toast.makeText(this,"Scan des appareils autour de vous ....",Toast.LENGTH_LONG).show();
             }
             // TEST REUSSI
             //for(BluetoothDevice bd : pairedDevices){
@@ -628,10 +638,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //}
 
         }
-        else{
-            //le bluetooth n'est pas activé
-        }
-
     }
 
     @Override
