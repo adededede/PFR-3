@@ -34,7 +34,6 @@ import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -94,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String action = intent.getAction();
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                //Toast.makeText(context, "nom : "+device.getName()+"\n@MAC : "+device.getAddress(),Toast.LENGTH_LONG).show();
                 //on initialise le set contenant les devices inconnus
                 notPairedDevices.add(device);
             }
@@ -141,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     case STATE_CONNEXION:
                         switch (message.arg1){
                             case 1:
-                                Toast.makeText(getApplicationContext(),"CONNECTE ",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(),"CONNECTE A "+connecte_a,Toast.LENGTH_SHORT).show();
                                 //Connecté à
                                 texte_nom.setText("Nom : "+connecte_a);
                                 break;
@@ -152,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
                     case STATE_READ:
                         Character recu = (Character) message.obj;
-                        //Toast.makeText(getApplicationContext(),"RECU : "+recu,Toast.LENGTH_SHORT).show();
                         //on dessine ce que l'on a recu
                         dessiner(recu);
                         break;
@@ -337,7 +334,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!isGpsEnabled) {
             startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
         }
-        //Toast.makeText(this,"CONNEXIONBLUETOOTH : unpaired : "+notPairedDevices.toString(),Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -627,7 +623,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             break;
                         case PackageManager.PERMISSION_GRANTED:
                             boolean a = bluetoothManager.getAdapter().startDiscovery();
-                            //Toast.makeText(MainActivity.this, "Start discovery : "+a, Toast.LENGTH_SHORT).show();
                             break;
                     }
                 }
@@ -649,9 +644,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     boolean a = bluetoothManager.getAdapter().startDiscovery();
-                    //Toast.makeText(MainActivity.this, "Start discovery : " + a, Toast.LENGTH_SHORT).show();
                 } else {
-                    //exit application or do the needful
+                    //erreur
                 }
                 return;
             }
@@ -664,6 +658,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         unregisterReceiver(receiver);
     }
 
+    //FORTE INSPIRATION : https://github.com/Hype47/droiduino/tree/master/DroiduinoBluetoothConnection/app/src/main
+    //CONCERNANT LES DEUX CLASSES CI-DESSOUS
     public static class ThreadConnexion extends Thread{
 
         public ThreadConnexion(BluetoothAdapter a, String adresse){
